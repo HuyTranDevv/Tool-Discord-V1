@@ -1,0 +1,1351 @@
+--[[ Countricked v21 - Sleek Tech GUI ]]
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local UIS = game:GetService("UserInputService")
+local Lighting = game:GetService("Lighting")
+local TweenService = game:GetService("TweenService")
+
+local LP = Players.LocalPlayer
+local Cam = workspace.CurrentCamera
+
+local state = {
+    camlockEnabled = false,
+    autoShoot = false,
+    espEnabled = false,
+    fpsBoost = false,
+    targetLineEnabled = true,
+    predictionEnabled = false,
+    target = nil,
+    fov = 350,
+    smoothness = 0.35,
+    lockPart = "Head",
+    priority = "Center",
+    predictionAmount = 0.15,
+    toggleKey = Enum.KeyCode.LeftShift,
+    ignoreTeam = true,
+    lockedOffset = nil,
+    shootDelay = 0.05,
+    useActivate = true,
+    moveMouseToCenter = true,
+    accentColor = Color3.fromRGB(0, 255, 200),
+    waitingForKey = false,
+}
+
+local keybindBtn = nil
+
+local function log(...) print("[Countricked]", ...) end
+
+-- ================== KEYBIND ==================
+local function updateKeybindDisplay()
+    if keybindBtn then keybindBtn.Text = "AIM KEY: " .. state.toggleKey.Name end
+end
+
+local function startKeybindCapture()
+    state.waitingForKey = true
+    if keybindBtn then
+        keybindBtn.Text = "PRESS ANY KEY..."
+        keybindBtn.BackgroundColor3 = Color3.fromRGB(80, 20, 20)
+    end
+end
+
+local function stopKeybindCapture()
+    state.waitingForKey = false
+    updateKeybindDisplay()
+    if keybindBtn then keybindBtn.BackgroundColor3 = Color3.fromRGB(20, 20, 25) end
+end
+
+-- ================== LOCK PART ==================
+local function getLockPart(char)
+    if not char then return nil end
+    if state.lockPart == "Head" then
+        return char:FindFirstChild("Head")
+    elseif state.lockPart == "Torso" then
+        return char:FindFirstChild("UpperTorso") or char:FindFirstChild("Torso") or char:FindFirstChild("HumanoidRootPart")
+    elseif state.lockPart == "Legs" then
+        local lt = char:FindFirstChild("LeftUpperLeg") or char:FindFirstChild("Left Leg")
+        if lt then return lt end
+        return char:FindFirstChild("HumanoidRootPart")
+    end
+    return char:FindFirstChild("Head") or char:FindFirstChild("HumanoidRootPart")
+end
+
+local function getLockPosition(char)
+    local part = getLockPart(char)
+    if not part then return nil end
+    local pos = part.Position
+    if state.lockPart == "Legs" then pos = pos + Vector3.new(0, -1.5, 0) end
+    return pos
+end
+
+local function getPredictedPosition(plr, partPos)
+    if not state.predictionEnabled then return partPos end
+    local char = plr.Character
+    if not char then return partPos end
+    local hrp = char:FindFirstChild("HumanoidRootPart")
+    if not hrp then return partPos end
+    return partPos + hrp.AssemblyLinearVelocity * state.predictionAmount
+end
+
+local function isSameTeam(plr)
+    if not state.ignoreTeam then
+        local mt, tt = LP.Team, plr.Team
+        if mt and tt and mt == tt then return true end
+    end
+    return false
+end
+
+-- ================== TARGET ==================
+local function getFrontPlayer()
+    local center = Vector2.new(Cam.ViewportSize.X / 2, Cam.ViewportSize.Y / 2)
+    local camPos = Cam.CFrame.Position
+    local best, bestScore = nil, math.huge
+    for _, plr in ipairs(Players:GetPlayers()) do
+        if plr ~= LP and not isSameTeam(plr) and plr.Character then
+            local hum = plr.Character:FindFirstChildOfClass("Humanoid")
+            local hrp = plr.Character:FindFirstChild("HumanoidRootPart")
+            if hum and hum.Health > 0 and hrp then
+                local sp, onScreen = Cam:WorldToViewportPoint(hrp.Position)
+                if onScreen and sp.Z > 0 then
+                    local screenDist = (Vector2.new(sp.X, sp.Y) - center).Magnitude
+                    if screenDist <= state.fov then
+                        local score
+                        if state.priority == "Center" then score = screenDist
+                        elseif state.priority == "Nearest" then score = (hrp.Position - camPos).Magnitude
+                        elseif state.priority == "LowHP" then score = hum.Health end
+                        if score < bestScore then bestScore = score; best = plr end
+                    end
+                end
+            end
+        end
+    end
+    return best
+end
+
+-- ================== CAMLOCK ==================
+local function camlockStep()
+    if not state.camlockEnabled then return end
+    local char = LP.Character; if not char then return end
+    local myHRP = char:FindFirstChild("HumanoidRootPart"); if not myHRP then return end
+    local t = state.target; if not t or not t.Character then return end
+    local hum = t.Character:FindFirstChildOfClass("Humanoid")
+    if not hum or hum.Health <= 0 then return end
+    local partPos = getLockPosition(t.Character)
+    if not partPos then return end
+    partPos = getPredictedPosition(t, partPos)
+    if not state.lockedOffset then state.lockedOffset = Cam.CFrame.Position - myHRP.Position end
+    local newCamPos = myHRP.Position + state.lockedOffset
+    local targetLook = (partPos - newCamPos)
+    if targetLook.Magnitude < 0.01 then return end
+    targetLook = targetLook.Unit
+    local newLook = Cam.CFrame.LookVector:Lerp(targetLook, state.smoothness)
+    if newLook.Magnitude < 0.01 then return end
+    newLook = newLook.Unit
+    Cam.CFrame = CFrame.lookAt(newCamPos, newCamPos + newLook)
+end
+
+local function startCamlock()
+    state.camlockEnabled = true
+    state.lockedOffset = nil
+    Cam.CameraType = Enum.CameraType.Scriptable
+    RunService:BindToRenderStep("CountrickedCamlock", Enum.RenderPriority.Camera.Value + 1, camlockStep)
+    local t = getFrontPlayer()
+    if t then state.target = t end
+end
+
+local function stopCamlock()
+    state.camlockEnabled = false
+    state.target = nil
+    state.lockedOffset = nil
+    RunService:UnbindFromRenderStep("CountrickedCamlock")
+    Cam.CameraType = Enum.CameraType.Custom
+end
+
+local function toggleCamlock() if state.camlockEnabled then stopCamlock() else startCamlock() end end
+
+-- ================== AUTO SHOOT ==================
+local function doClick()
+    if state.moveMouseToCenter then
+        local cx = Cam.ViewportSize.X / 2
+        local cy = Cam.ViewportSize.Y / 2
+        if mousemoveabs then pcall(mousemoveabs, cx, cy)
+        elseif mousemoverel then
+            local cur = UIS:GetMouseLocation()
+            pcall(mousemoverel, cx - cur.X, cy - cur.Y)
+        end
+    end
+    if state.useActivate then
+        local char = LP.Character
+        if char then
+            local tool = char:FindFirstChildOfClass("Tool")
+            if tool then pcall(function() tool:Activate() end); return end
+        end
+    end
+    if mouse1click then pcall(mouse1click)
+    elseif mouse1press and mouse1release then
+        pcall(function() mouse1press(); task.wait(0.02); mouse1release() end)
+    end
+end
+
+-- ================== ESP ==================
+local espFolder = Instance.new("Folder")
+espFolder.Name = "CountrickedESP"
+espFolder.Parent = game:GetService("CoreGui")
+local espCache = {}
+
+local function createESP(plr)
+    if espCache[plr] then return end
+    local bb = Instance.new("BillboardGui")
+    bb.Size = UDim2.new(0, 90, 0, 16)
+    bb.StudsOffset = Vector3.new(0, 3, 0)
+    bb.AlwaysOnTop = true
+    bb.ResetOnSpawn = false
+    bb.Parent = espFolder
+    local lbl = Instance.new("TextLabel")
+    lbl.Size = UDim2.new(1, 0, 1, 0)
+    lbl.BackgroundTransparency = 1
+    lbl.Text = plr.Name
+    lbl.TextColor3 = Color3.fromRGB(255,255,255)
+    lbl.TextStrokeTransparency = 0.3
+    lbl.Font = Enum.Font.GothamBold
+    lbl.TextSize = 11
+    lbl.Parent = bb
+    espCache[plr] = {billboard = bb, label = lbl}
+end
+
+local function removeESP(plr)
+    if espCache[plr] then
+        if espCache[plr].billboard then espCache[plr].billboard:Destroy() end
+        espCache[plr] = nil
+    end
+end
+
+Players.PlayerAdded:Connect(function(p) if p ~= LP then createESP(p) end end)
+Players.PlayerRemoving:Connect(function(p) removeESP(p) end)
+for _, p in ipairs(Players:GetPlayers()) do if p ~= LP then createESP(p) end end
+
+task.spawn(function()
+    while task.wait(0.15) do
+        for plr, data in pairs(espCache) do
+            if state.espEnabled and plr.Character then
+                local head = plr.Character:FindFirstChild("Head")
+                if head then
+                    data.billboard.Adornee = head
+                    data.billboard.Enabled = true
+                    data.label.TextColor3 = plr.Team and plr.Team.TeamColor.Color or state.accentColor
+                else
+                    data.billboard.Enabled = false
+                end
+            else
+                data.billboard.Enabled = false
+            end
+        end
+    end
+end)
+
+-- ================== MARKER ==================
+local markerGui = Instance.new("BillboardGui")
+markerGui.Name = "CountrickedMarker"
+markerGui.Size = UDim2.new(0, 40, 0, 60)
+markerGui.StudsOffset = Vector3.new(0, 4.5, 0)
+markerGui.AlwaysOnTop = true
+markerGui.Enabled = false
+markerGui.Parent = game:GetService("CoreGui")
+
+local exclaim = Instance.new("TextLabel")
+exclaim.Size = UDim2.new(1, 0, 1, 0)
+exclaim.BackgroundTransparency = 1
+exclaim.Text = "!"
+exclaim.TextColor3 = Color3.fromRGB(255, 30, 30)
+exclaim.TextStrokeTransparency = 0
+exclaim.TextStrokeColor3 = Color3.fromRGB(120, 0, 0)
+exclaim.Font = Enum.Font.GothamBold
+exclaim.TextSize = 48
+exclaim.Parent = markerGui
+
+for _, size in ipairs({54, 62}) do
+    local g = Instance.new("TextLabel")
+    g.Size = UDim2.new(1, 0, 1, 0)
+    g.BackgroundTransparency = 1
+    g.Text = "!"
+    g.TextColor3 = Color3.fromRGB(255, 50, 50)
+    g.TextTransparency = 0.6
+    g.Font = Enum.Font.GothamBold
+    g.TextSize = size
+    g.ZIndex = exclaim.ZIndex - 1
+    g.Parent = markerGui
+end
+
+task.spawn(function()
+    local t = 0
+    while task.wait(0.05) do
+        if markerGui.Enabled then
+            t = t + 0.05
+            local alpha = 0.5 + math.sin(t * 6) * 0.3
+            exclaim.TextTransparency = 1 - alpha
+        end
+    end
+end)
+
+task.spawn(function()
+    while task.wait(0.05) do
+        if state.camlockEnabled and state.target and state.target.Character then
+            local head = state.target.Character:FindFirstChild("Head")
+            if head then
+                markerGui.Adornee = head
+                markerGui.Enabled = true
+            else
+                markerGui.Enabled = false
+            end
+        else
+            markerGui.Enabled = false
+        end
+    end
+end)
+
+-- ================== FPS BOOST ==================
+local savedData = {effects = {}, decals = {}, materials = {}, settings = {}}
+
+local function applyFpsBoost()
+    state.fpsBoost = true
+    local L = Lighting
+    savedData.settings = {
+        GlobalShadows = L.GlobalShadows, FogEnd = L.FogEnd, Brightness = L.Brightness,
+        EnvironmentDiffuseScale = L.EnvironmentDiffuseScale,
+        EnvironmentSpecularScale = L.EnvironmentSpecularScale,
+    }
+    L.GlobalShadows = false; L.FogEnd = 1e6; L.Brightness = 0
+    L.EnvironmentDiffuseScale = 0; L.EnvironmentSpecularScale = 0
+    for _, v in ipairs(L:GetChildren()) do
+        if v:IsA("PostEffect") or v:IsA("Atmosphere") or v:IsA("Sky") then
+            savedData.effects[v] = v.Enabled
+            pcall(function() v.Enabled = false end)
+        end
+    end
+    for _, obj in ipairs(workspace:GetDescendants()) do
+        if obj:IsA("Decal") or obj:IsA("Texture") then
+            if obj.Transparency < 1 then savedData.decals[obj] = obj.Transparency; obj.Transparency = 1 end
+        elseif obj:IsA("BasePart") then
+            savedData.materials[obj] = obj.Material
+            obj.Material = Enum.Material.SmoothPlastic
+            if obj:IsA("MeshPart") and obj.TextureID ~= "" then
+                savedData.decals[obj] = obj.TextureID
+                obj.TextureID = ""
+            end
+        elseif obj:IsA("ParticleEmitter") or obj:IsA("Beam") or obj:IsA("Trail") or obj:IsA("Fire") or obj:IsA("Smoke") or obj:IsA("Sparkles") then
+            savedData.effects[obj] = obj.Enabled
+            pcall(function() obj.Enabled = false end)
+        end
+    end
+    pcall(function() settings().Rendering.QualityLevel = Enum.QualityLevel.Level01 end)
+end
+
+local function revertFpsBoost()
+    state.fpsBoost = false
+    for k, v in pairs(savedData.settings) do pcall(function() Lighting[k] = v end) end
+    for obj, val in pairs(savedData.effects) do if obj and obj.Parent then pcall(function() obj.Enabled = val end) end end
+    for obj, val in pairs(savedData.decals) do
+        if obj and obj.Parent then
+            pcall(function()
+                if obj:IsA("MeshPart") then obj.TextureID = val else obj.Transparency = val end
+            end)
+        end
+    end
+    for obj, val in pairs(savedData.materials) do if obj and obj.Parent then pcall(function() obj.Material = val end) end end
+    pcall(function() settings().Rendering.QualityLevel = Enum.QualityLevel.Automatic end)
+    savedData = {effects = {}, decals = {}, materials = {}, settings = {}}
+end
+
+-- ================== GUI ==================
+local gui = Instance.new("ScreenGui")
+gui.Name = "Countricked"
+gui.ResetOnSpawn = false
+gui.IgnoreGuiInset = true
+gui.Parent = LP:WaitForChild("PlayerGui")
+
+local overlayGui = Instance.new("ScreenGui")
+overlayGui.Name = "CountrickedOverlay"
+overlayGui.ResetOnSpawn = false
+overlayGui.IgnoreGuiInset = true
+overlayGui.Parent = LP:WaitForChild("PlayerGui")
+
+local lineFrame = Instance.new("Frame")
+lineFrame.BackgroundTransparency = 1
+lineFrame.Size = UDim2.new(1, 0, 1, 0)
+lineFrame.Parent = overlayGui
+
+local line = Instance.new("Frame")
+line.AnchorPoint = Vector2.new(0.5, 0.5)
+line.BackgroundColor3 = state.accentColor
+line.BorderSizePixel = 0
+line.BackgroundTransparency = 0.3
+line.ZIndex = 5
+line.Visible = false
+line.Parent = lineFrame
+
+task.spawn(function()
+    while task.wait(0.03) do
+        if state.targetLineEnabled and state.target and state.target.Character and state.camlockEnabled then
+            local partPos = getLockPosition(state.target.Character)
+            if partPos then
+                local sp, onScreen = Cam:WorldToViewportPoint(partPos)
+                if onScreen and sp.Z > 0 then
+                    local mp = UIS:GetMouseLocation()
+                    local dx = sp.X - mp.X
+                    local dy = sp.Y - mp.Y
+                    local dist = math.sqrt(dx*dx + dy*dy)
+                    local angle = math.atan2(dy, dx)
+                    line.Size = UDim2.new(0, dist, 0, 1)
+                    line.Position = UDim2.new(0, mp.X + dx/2, 0, mp.Y + dy/2)
+                    line.Rotation = math.deg(angle)
+                    line.BackgroundColor3 = state.accentColor
+                    line.Visible = true
+                else
+                    line.Visible = false
+                end
+            end
+        else
+            line.Visible = false
+        end
+    end
+end)
+
+-- THEME
+local COL_BG = Color3.fromRGB(0, 0, 0)
+local COL_PANEL = Color3.fromRGB(10, 10, 12)
+local COL_PANEL2 = Color3.fromRGB(16, 16, 20)
+local COL_BORDER = Color3.fromRGB(35, 35, 42)
+local COL_BORDER_BRIGHT = Color3.fromRGB(60, 60, 70)
+local COL_TEXT = Color3.fromRGB(240, 240, 245)
+local COL_TEXT_DIM = Color3.fromRGB(110, 110, 125)
+local COL_DANGER = Color3.fromRGB(220, 60, 80)
+local COL_INPUT = Color3.fromRGB(18, 18, 22)
+
+local FONT = Enum.Font.Gotham
+local FONT_B = Enum.Font.GothamBold
+local FONT_M = Enum.Font.GothamMedium
+
+-- Main frame
+local main = Instance.new("Frame")
+main.Size = UDim2.new(0, 340, 0, 460)
+main.Position = UDim2.new(0, 30, 0, 60)
+main.BackgroundColor3 = COL_BG
+main.BorderSizePixel = 0
+main.Active = true
+main.Draggable = true
+main.Parent = gui
+
+-- Double border effect
+local border1 = Instance.new("UIStroke", main)
+border1.Color = COL_BORDER_BRIGHT
+border1.Thickness = 1
+border1.Transparency = 0
+
+local border2 = Instance.new("UIStroke", main)
+border2.Color = state.accentColor
+border2.Thickness = 3
+border2.Transparency = 0.8
+
+-- ================== TITLE BAR ==================
+local titleBar = Instance.new("Frame")
+titleBar.Size = UDim2.new(1, 0, 0, 48)
+titleBar.BackgroundColor3 = Color3.fromRGB(4, 4, 6)
+titleBar.BorderSizePixel = 0
+titleBar.Parent = main
+
+local titleBottomLine = Instance.new("Frame")
+titleBottomLine.Size = UDim2.new(1, 0, 0, 1)
+titleBottomLine.Position = UDim2.new(0, 0, 1, -1)
+titleBottomLine.BackgroundColor3 = COL_BORDER_BRIGHT
+titleBottomLine.BorderSizePixel = 0
+titleBottomLine.Parent = titleBar
+
+local titleAccentLine = Instance.new("Frame")
+titleAccentLine.Size = UDim2.new(0, 80, 0, 2)
+titleAccentLine.Position = UDim2.new(0, 0, 1, -2)
+titleAccentLine.BackgroundColor3 = state.accentColor
+titleAccentLine.BorderSizePixel = 0
+titleAccentLine.Parent = titleBar
+
+-- Corner accents
+local function cornerAccent(parent, pos, size, col)
+    local f = Instance.new("Frame")
+    f.Size = size
+    f.Position = pos
+    f.BackgroundColor3 = col or state.accentColor
+    f.BorderSizePixel = 0
+    f.Parent = parent
+    return f
+end
+
+cornerAccent(titleBar, UDim2.new(0, 0, 0, 0), UDim2.new(0, 10, 0, 2))
+cornerAccent(titleBar, UDim2.new(0, 0, 0, 0), UDim2.new(0, 2, 0, 10))
+cornerAccent(titleBar, UDim2.new(1, -10, 0, 0), UDim2.new(0, 10, 0, 2))
+cornerAccent(titleBar, UDim2.new(1, -2, 0, 0), UDim2.new(0, 2, 0, 10))
+
+-- Logo
+local logoFrame = Instance.new("Frame")
+logoFrame.Size = UDim2.new(0, 30, 0, 30)
+logoFrame.Position = UDim2.new(0, 12, 0.5, -15)
+logoFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+logoFrame.BorderSizePixel = 0
+logoFrame.Parent = titleBar
+Instance.new("UICorner", logoFrame).CornerRadius = UDim.new(0, 3)
+
+local logoStroke = Instance.new("UIStroke", logoFrame)
+logoStroke.Color = state.accentColor
+logoStroke.Thickness = 1.5
+
+local logoImage = Instance.new("ImageLabel")
+logoImage.Size = UDim2.new(1, -4, 1, -4)
+logoImage.Position = UDim2.new(0, 2, 0, 2)
+logoImage.BackgroundTransparency = 1
+logoImage.Image = "rbxthumb://type=Asset&id=88534977573445&w=150&h=150"
+logoImage.ScaleType = Enum.ScaleType.Fit
+logoImage.Parent = logoFrame
+
+-- Title
+local title = Instance.new("TextLabel")
+title.Size = UDim2.new(1, -150, 0, 16)
+title.Position = UDim2.new(0, 50, 0, 10)
+title.BackgroundTransparency = 1
+title.Text = "COUNTRICKED"
+title.TextColor3 = COL_TEXT
+title.Font = FONT_B
+title.TextSize = 13
+title.TextXAlignment = Enum.TextXAlignment.Left
+title.Parent = titleBar
+
+local subtitle = Instance.new("TextLabel")
+subtitle.Size = UDim2.new(1, -150, 0, 12)
+subtitle.Position = UDim2.new(0, 50, 0, 26)
+subtitle.BackgroundTransparency = 1
+subtitle.Text = "ADVANCED AIM SYSTEM  //  v21"
+subtitle.TextColor3 = COL_TEXT_DIM
+subtitle.Font = FONT_M
+subtitle.TextSize = 8
+subtitle.TextXAlignment = Enum.TextXAlignment.Left
+subtitle.Parent = titleBar
+
+-- Version chip
+local versionChip = Instance.new("Frame")
+versionChip.Size = UDim2.new(0, 40, 0, 18)
+versionChip.Position = UDim2.new(1, -128, 0.5, -9)
+versionChip.BackgroundColor3 = COL_INPUT
+versionChip.BorderSizePixel = 0
+versionChip.Parent = titleBar
+Instance.new("UICorner", versionChip).CornerRadius = UDim.new(0, 2)
+local vcStroke = Instance.new("UIStroke", versionChip)
+vcStroke.Color = COL_BORDER
+vcStroke.Thickness = 1
+
+local vcText = Instance.new("TextLabel")
+vcText.Size = UDim2.new(1, 0, 1, 0)
+vcText.BackgroundTransparency = 1
+vcText.Text = "v21"
+vcText.TextColor3 = state.accentColor
+vcText.Font = FONT_B
+vcText.TextSize = 10
+vcText.Parent = versionChip
+
+-- Min button
+local minBtn = Instance.new("TextButton")
+minBtn.Size = UDim2.new(0, 26, 0, 26)
+minBtn.Position = UDim2.new(1, -62, 0.5, -13)
+minBtn.BackgroundColor3 = COL_INPUT
+minBtn.Text = "—"
+minBtn.TextColor3 = COL_TEXT
+minBtn.Font = FONT_B
+minBtn.TextSize = 12
+minBtn.AutoButtonColor = false
+minBtn.Parent = titleBar
+Instance.new("UICorner", minBtn).CornerRadius = UDim.new(0, 2)
+local minStroke = Instance.new("UIStroke", minBtn)
+minStroke.Color = COL_BORDER
+minStroke.Thickness = 1
+
+-- Close button
+local closeBtn = Instance.new("TextButton")
+closeBtn.Size = UDim2.new(0, 26, 0, 26)
+closeBtn.Position = UDim2.new(1, -32, 0.5, -13)
+closeBtn.BackgroundColor3 = COL_INPUT
+closeBtn.Text = "×"
+closeBtn.TextColor3 = COL_TEXT
+closeBtn.Font = FONT_B
+closeBtn.TextSize = 14
+closeBtn.AutoButtonColor = false
+closeBtn.Parent = titleBar
+Instance.new("UICorner", closeBtn).CornerRadius = UDim.new(0, 2)
+local closeStroke = Instance.new("UIStroke", closeBtn)
+closeStroke.Color = COL_BORDER
+closeStroke.Thickness = 1
+
+local function addHover(btn, baseCol, hoverCol, strokeObj, strokeBase, strokeHover)
+    btn.MouseEnter:Connect(function()
+        TweenService:Create(btn, TweenInfo.new(0.15), {BackgroundColor3 = hoverCol}):Play()
+        if strokeObj then TweenService:Create(strokeObj, TweenInfo.new(0.15), {Color = strokeHover or state.accentColor}):Play() end
+    end)
+    btn.MouseLeave:Connect(function()
+        TweenService:Create(btn, TweenInfo.new(0.15), {BackgroundColor3 = baseCol}):Play()
+        if strokeObj then TweenService:Create(strokeObj, TweenInfo.new(0.15), {Color = strokeBase or COL_BORDER}):Play() end
+    end)
+end
+addHover(minBtn, COL_INPUT, Color3.fromRGB(60,60,70), minStroke, COL_BORDER, state.accentColor)
+addHover(closeBtn, COL_INPUT, COL_DANGER, closeStroke, COL_BORDER, COL_DANGER)
+
+-- ================== TAB BAR ==================
+local tabBar = Instance.new("Frame")
+tabBar.Size = UDim2.new(1, -20, 0, 38)
+tabBar.Position = UDim2.new(0, 10, 0, 56)
+tabBar.BackgroundColor3 = Color3.fromRGB(4, 4, 6)
+tabBar.BorderSizePixel = 0
+tabBar.Parent = main
+local tabBarStroke = Instance.new("UIStroke", tabBar)
+tabBarStroke.Color = COL_BORDER
+tabBarStroke.Thickness = 1
+
+local tabList = Instance.new("UIListLayout")
+tabList.FillDirection = Enum.FillDirection.Horizontal
+tabList.Padding = UDim.new(0, 0)
+tabList.SortOrder = Enum.SortOrder.LayoutOrder
+tabList.HorizontalAlignment = Enum.HorizontalAlignment.Left
+tabList.VerticalAlignment = Enum.VerticalAlignment.Center
+tabList.Parent = tabBar
+
+local tabContainer = Instance.new("Frame")
+tabContainer.Size = UDim2.new(1, -20, 1, -160)
+tabContainer.Position = UDim2.new(0, 10, 0, 102)
+tabContainer.BackgroundTransparency = 1
+tabContainer.Parent = main
+
+local pages = {}
+local tabButtons = {}
+local currentTab = nil
+
+local function createTab(name, icon, order)
+    local btn = Instance.new("TextButton")
+    btn.Size = UDim2.new(0, 106, 1, 0)
+    btn.BackgroundColor3 = Color3.fromRGB(4, 4, 6)
+    btn.Text = ""
+    btn.AutoButtonColor = false
+    btn.LayoutOrder = order
+    btn.Parent = tabBar
+
+    local btnAccent = Instance.new("Frame")
+    btnAccent.Size = UDim2.new(1, 0, 0, 2)
+    btnAccent.Position = UDim2.new(0, 0, 1, -2)
+    btnAccent.BackgroundColor3 = COL_BORDER
+    btnAccent.BorderSizePixel = 0
+    btnAccent.Parent = btn
+
+    local btnText = Instance.new("TextLabel")
+    btnText.Size = UDim2.new(1, 0, 1, 0)
+    btnText.BackgroundTransparency = 1
+    btnText.Text = icon .. "  " .. name
+    btnText.TextColor3 = COL_TEXT_DIM
+    btnText.Font = FONT_B
+    btnText.TextSize = 11
+    btnText.Parent = btn
+
+    local page = Instance.new("ScrollingFrame")
+    page.Size = UDim2.new(1, 0, 1, 0)
+    page.BackgroundTransparency = 1
+    page.BorderSizePixel = 0
+    page.ScrollBarThickness = 2
+    page.ScrollBarImageColor3 = state.accentColor
+    page.CanvasSize = UDim2.new(0, 0, 0, 0)
+    page.Visible = false
+    page.Parent = tabContainer
+
+    local layout = Instance.new("UIListLayout")
+    layout.Padding = UDim.new(0, 6)
+    layout.SortOrder = Enum.SortOrder.LayoutOrder
+    layout.Parent = page
+
+    layout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+        page.CanvasSize = UDim2.new(0, 0, 0, layout.AbsoluteContentSize.Y + 8)
+    end)
+
+    pages[name] = {page = page, layout = layout, accent = btnAccent, text = btnText}
+    table.insert(tabButtons, {name = name, btn = btn, stroke = tabBarStroke, data = pages[name]})
+    return page, layout
+end
+
+local function switchTab(name)
+    if currentTab == name then return end
+    currentTab = name
+    for tabName, data in pairs(pages) do
+        data.page.Visible = (tabName == name)
+        if tabName == name then
+            TweenService:Create(data.accent, TweenInfo.new(0.2), {BackgroundColor3 = state.accentColor}):Play()
+            TweenService:Create(data.text, TweenInfo.new(0.2), {TextColor3 = COL_TEXT}):Play()
+            TweenService:Create(data.page.Parent, TweenInfo.new(0.2), {}):Play()
+        else
+            TweenService:Create(data.accent, TweenInfo.new(0.2), {BackgroundColor3 = COL_BORDER}):Play()
+            TweenService:Create(data.text, TweenInfo.new(0.2), {TextColor3 = COL_TEXT_DIM}):Play()
+        end
+    end
+end
+
+-- ================== HELPERS ==================
+local accentElements = {}
+local function regAccent(obj, prop)
+    table.insert(accentElements, {obj = obj, prop = prop})
+end
+
+local function applyAccent()
+    for _, e in ipairs(accentElements) do
+        if e.obj and e.obj.Parent then
+            pcall(function() e.obj[e.prop] = state.accentColor end)
+        end
+    end
+    line.BackgroundColor3 = state.accentColor
+    logoStroke.Color = state.accentColor
+    border2.Color = state.accentColor
+    titleAccentLine.BackgroundColor3 = state.accentColor
+    vcText.TextColor3 = state.accentColor
+    tabBarStroke.Color = state.accentColor
+    if currentTab then
+        local t = currentTab
+        currentTab = nil
+        switchTab(t)
+    end
+end
+
+local function makeSection(parent, layout, text)
+    local f = Instance.new("Frame")
+    f.Size = UDim2.new(1, -4, 0, 26)
+    f.BackgroundColor3 = Color3.fromRGB(4, 4, 6)
+    f.BorderSizePixel = 0
+    f.Parent = parent
+    local s = Instance.new("UIStroke", f)
+    s.Color = COL_BORDER
+    s.Thickness = 1
+
+    local corner1 = Instance.new("Frame")
+    corner1.Size = UDim2.new(0, 6, 0, 2)
+    corner1.BackgroundColor3 = state.accentColor
+    corner1.BorderSizePixel = 0
+    corner1.Parent = f
+    regAccent(corner1, "BackgroundColor3")
+
+    local corner2 = Instance.new("Frame")
+    corner2.Size = UDim2.new(0, 2, 0, 6)
+    corner2.BackgroundColor3 = state.accentColor
+    corner2.BorderSizePixel = 0
+    corner2.Parent = f
+    regAccent(corner2, "BackgroundColor3")
+
+    local accentBar = Instance.new("Frame")
+    accentBar.Size = UDim2.new(0, 3, 1, -8)
+    accentBar.Position = UDim2.new(0, 4, 0, 4)
+    accentBar.BackgroundColor3 = state.accentColor
+    accentBar.BorderSizePixel = 0
+    accentBar.Parent = f
+    regAccent(accentBar, "BackgroundColor3")
+
+    local lbl = Instance.new("TextLabel")
+    lbl.Size = UDim2.new(1, -60, 1, 0)
+    lbl.Position = UDim2.new(0, 14, 0, 0)
+    lbl.BackgroundTransparency = 1
+    lbl.Text = text:upper()
+    lbl.TextColor3 = COL_TEXT
+    lbl.Font = FONT_B
+    lbl.TextSize = 10
+    lbl.TextXAlignment = Enum.TextXAlignment.Left
+    lbl.Parent = f
+
+    local tag = Instance.new("TextLabel")
+    tag.Size = UDim2.new(0, 40, 1, 0)
+    tag.Position = UDim2.new(1, -46, 0, 0)
+    tag.BackgroundTransparency = 1
+    tag.Text = "[///]"
+    tag.TextColor3 = COL_TEXT_DIM
+    tag.Font = FONT_M
+    tag.TextSize = 8
+    tag.TextXAlignment = Enum.TextXAlignment.Right
+    tag.Parent = f
+
+    local scan = Instance.new("Frame")
+    scan.Size = UDim2.new(0, 40, 1, 0)
+    scan.BackgroundColor3 = state.accentColor
+    scan.BackgroundTransparency = 0.92
+    scan.BorderSizePixel = 0
+    scan.Parent = f
+    task.spawn(function()
+        while scan.Parent do
+            scan.Position = UDim2.new(0, -40, 0, 0)
+            TweenService:Create(scan, TweenInfo.new(2, Enum.EasingStyle.Linear), {Position = UDim2.new(1, 0, 0, 0)}):Play()
+            task.wait(2)
+        end
+    end)
+end
+
+local function makeToggle(parent, text, defaultOn, callback)
+    local btn = Instance.new("TextButton")
+    btn.Size = UDim2.new(1, -4, 0, 36)
+    btn.BackgroundColor3 = COL_PANEL
+    btn.Text = ""
+    btn.AutoButtonColor = false
+    btn.Parent = parent
+    local stroke = Instance.new("UIStroke", btn)
+    stroke.Color = COL_BORDER
+    stroke.Thickness = 1
+
+    local accentBar = Instance.new("Frame")
+    accentBar.Size = UDim2.new(0, 3, 1, -10)
+    accentBar.Position = UDim2.new(0, 3, 0, 5)
+    accentBar.BackgroundColor3 = defaultOn and state.accentColor or COL_BORDER
+    accentBar.BorderSizePixel = 0
+    accentBar.Parent = btn
+    if defaultOn then regAccent(accentBar, "BackgroundColor3") end
+
+    local lbl = Instance.new("TextLabel")
+    lbl.Size = UDim2.new(1, -100, 1, 0)
+    lbl.Position = UDim2.new(0, 14, 0, 0)
+    lbl.BackgroundTransparency = 1
+    lbl.Text = text
+    lbl.TextColor3 = COL_TEXT
+    lbl.Font = FONT
+    lbl.TextSize = 12
+    lbl.TextXAlignment = Enum.TextXAlignment.Left
+    lbl.Parent = btn
+
+    local status = Instance.new("TextLabel")
+    status.Size = UDim2.new(0, 44, 1, 0)
+    status.Position = UDim2.new(1, -62, 0, 0)
+    status.BackgroundTransparency = 1
+    status.Text = defaultOn and "ON" or "OFF"
+    status.TextColor3 = defaultOn and state.accentColor or COL_TEXT_DIM
+    status.Font = FONT_B
+    status.TextSize = 10
+    status.TextXAlignment = Enum.TextXAlignment.Right
+    status.Parent = btn
+    if defaultOn then regAccent(status, "TextColor3") end
+
+    local box = Instance.new("Frame")
+    box.Size = UDim2.new(0, 18, 0, 18)
+    box.Position = UDim2.new(1, -24, 0.5, -9)
+    box.BackgroundColor3 = defaultOn and state.accentColor or COL_INPUT
+    box.BorderSizePixel = 0
+    box.Parent = btn
+    Instance.new("UICorner", box).CornerRadius = UDim.new(0, 2)
+    local bs = Instance.new("UIStroke", box)
+    bs.Color = defaultOn and state.accentColor or COL_BORDER
+    bs.Thickness = 1
+    if defaultOn then regAccent(box, "BackgroundColor3") end
+
+    local stateOn = defaultOn
+    btn.MouseButton1Click:Connect(function()
+        stateOn = not stateOn
+        local col = stateOn and state.accentColor or COL_INPUT
+        TweenService:Create(box, TweenInfo.new(0.15), {BackgroundColor3 = col}):Play()
+        TweenService:Create(bs, TweenInfo.new(0.15), {Color = stateOn and state.accentColor or COL_BORDER}):Play()
+        TweenService:Create(stroke, TweenInfo.new(0.15), {Color = stateOn and state.accentColor or COL_BORDER}):Play()
+        accentBar.BackgroundColor3 = stateOn and state.accentColor or COL_BORDER
+        status.Text = stateOn and "ON" or "OFF"
+        status.TextColor3 = stateOn and state.accentColor or COL_TEXT_DIM
+        if callback then callback(stateOn) end
+    end)
+
+    btn.MouseEnter:Connect(function()
+        TweenService:Create(btn, TweenInfo.new(0.15), {BackgroundColor3 = COL_PANEL2}):Play()
+        if not stateOn then TweenService:Create(stroke, TweenInfo.new(0.15), {Color = COL_BORDER_BRIGHT}):Play() end
+    end)
+    btn.MouseLeave:Connect(function()
+        TweenService:Create(btn, TweenInfo.new(0.15), {BackgroundColor3 = COL_PANEL}):Play()
+        if not stateOn then TweenService:Create(stroke, TweenInfo.new(0.15), {Color = COL_BORDER}):Play() end
+    end)
+    return btn
+end
+
+local function makeButton(parent, text, callback)
+    local btn = Instance.new("TextButton")
+    btn.Size = UDim2.new(1, -4, 0, 32)
+    btn.BackgroundColor3 = COL_PANEL
+    btn.Text = text
+    btn.TextColor3 = COL_TEXT
+    btn.Font = FONT_B
+    btn.TextSize = 11
+    btn.AutoButtonColor = false
+    btn.Parent = parent
+    local stroke = Instance.new("UIStroke", btn)
+    stroke.Color = COL_BORDER
+    stroke.Thickness = 1
+
+    btn.MouseButton1Click:Connect(callback)
+    btn.MouseEnter:Connect(function()
+        TweenService:Create(btn, TweenInfo.new(0.15), {BackgroundColor3 = state.accentColor, TextColor3 = Color3.fromRGB(0, 0, 0)}):Play()
+        TweenService:Create(stroke, TweenInfo.new(0.15), {Color = state.accentColor}):Play()
+    end)
+    btn.MouseLeave:Connect(function()
+        TweenService:Create(btn, TweenInfo.new(0.15), {BackgroundColor3 = COL_PANEL, TextColor3 = COL_TEXT}):Play()
+        TweenService:Create(stroke, TweenInfo.new(0.15), {Color = COL_BORDER}):Play()
+    end)
+    return btn
+end
+
+local function makeSelector(parent, prefix, opts, labels, getCurrent, setCurrent)
+    local wrap = Instance.new("Frame")
+    wrap.Size = UDim2.new(1, -4, 0, 36)
+    wrap.BackgroundColor3 = COL_PANEL
+    wrap.BorderSizePixel = 0
+    wrap.Parent = parent
+    local stroke = Instance.new("UIStroke", wrap)
+    stroke.Color = COL_BORDER
+    stroke.Thickness = 1
+
+    local accentBar = Instance.new("Frame")
+    accentBar.Size = UDim2.new(0, 3, 1, -10)
+    accentBar.Position = UDim2.new(0, 3, 0, 5)
+    accentBar.BackgroundColor3 = COL_BORDER
+    accentBar.BorderSizePixel = 0
+    accentBar.Parent = wrap
+
+    local label = Instance.new("TextLabel")
+    label.Size = UDim2.new(0, 46, 1, 0)
+    label.Position = UDim2.new(0, 12, 0, 0)
+    label.BackgroundTransparency = 1
+    label.Text = prefix
+    label.TextColor3 = COL_TEXT
+    label.Font = FONT_B
+    label.TextSize = 11
+    label.TextXAlignment = Enum.TextXAlignment.Left
+    label.Parent = wrap
+
+    local buttons = {}
+    local totalW = 290
+    local btnW = (totalW - 68) / #opts - 6
+    for i, opt in ipairs(opts) do
+        local btn = Instance.new("TextButton")
+        btn.Size = UDim2.new(0, btnW, 0, 22)
+        btn.Position = UDim2.new(0, 62 + (i - 1) * (btnW + 6), 0.5, -11)
+        local active = (getCurrent() == opt)
+        btn.BackgroundColor3 = active and state.accentColor or COL_INPUT
+        btn.Text = labels[i]
+        btn.TextColor3 = active and Color3.fromRGB(0, 0, 0) or COL_TEXT
+        btn.Font = FONT_B
+        btn.TextSize = 10
+        btn.AutoButtonColor = false
+        btn.Parent = wrap
+        Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 2)
+        local bs = Instance.new("UIStroke", btn)
+        bs.Color = active and state.accentColor or COL_BORDER
+        bs.Thickness = 1
+
+        btn.MouseButton1Click:Connect(function()
+            setCurrent(opt)
+            for j, other in ipairs(buttons) do
+                local act = (opts[j] == opt)
+                other.BackgroundColor3 = act and state.accentColor or COL_INPUT
+                other.TextColor3 = act and Color3.fromRGB(0, 0, 0) or COL_TEXT
+                other:FindFirstChildOfClass("UIStroke").Color = act and state.accentColor or COL_BORDER
+            end
+            state.lockedOffset = nil
+        end)
+        table.insert(buttons, btn)
+    end
+end
+
+local function makeSlider(parent, label, min, max, default, callback, suffix)
+    suffix = suffix or ""
+    local wrap = Instance.new("Frame")
+    wrap.Size = UDim2.new(1, -4, 0, 48)
+    wrap.BackgroundColor3 = COL_PANEL
+    wrap.BorderSizePixel = 0
+    wrap.Parent = parent
+    local stroke = Instance.new("UIStroke", wrap)
+    stroke.Color = COL_BORDER
+    stroke.Thickness = 1
+
+    local accentBar = Instance.new("Frame")
+    accentBar.Size = UDim2.new(0, 3, 1, -10)
+    accentBar.Position = UDim2.new(0, 3, 0, 5)
+    accentBar.BackgroundColor3 = COL_BORDER
+    accentBar.BorderSizePixel = 0
+    accentBar.Parent = wrap
+
+    local lbl = Instance.new("TextLabel")
+    lbl.Size = UDim2.new(1, -110, 0, 18)
+    lbl.Position = UDim2.new(0, 12, 0, 5)
+    lbl.BackgroundTransparency = 1
+    lbl.Text = label
+    lbl.TextColor3 = COL_TEXT
+    lbl.Font = FONT
+    lbl.TextSize = 11
+    lbl.TextXAlignment = Enum.TextXAlignment.Left
+    lbl.Parent = wrap
+
+    local valLbl = Instance.new("TextLabel")
+    valLbl.Size = UDim2.new(0, 80, 0, 18)
+    valLbl.Position = UDim2.new(1, -92, 0, 5)
+    valLbl.BackgroundTransparency = 1
+    valLbl.Text = string.format("%.2f%s", default, suffix)
+    valLbl.TextColor3 = state.accentColor
+    valLbl.Font = FONT_B
+    valLbl.TextSize = 11
+    valLbl.TextXAlignment = Enum.TextXAlignment.Right
+    valLbl.Parent = wrap
+    regAccent(valLbl, "TextColor3")
+
+    local bar = Instance.new("Frame")
+    bar.Size = UDim2.new(1, -24, 0, 6)
+    bar.Position = UDim2.new(0, 12, 0, 34)
+    bar.BackgroundColor3 = COL_INPUT
+    bar.BorderSizePixel = 0
+    bar.Parent = wrap
+    Instance.new("UICorner", bar).CornerRadius = UDim.new(0, 3)
+
+    local fill = Instance.new("Frame")
+    local relDefault = (default - min) / (max - min)
+    fill.Size = UDim2.new(relDefault, 0, 1, 0)
+    fill.BackgroundColor3 = state.accentColor
+    fill.BorderSizePixel = 0
+    fill.Parent = bar
+    Instance.new("UICorner", fill).CornerRadius = UDim.new(0, 3)
+    regAccent(fill, "BackgroundColor3")
+
+    local knob = Instance.new("Frame")
+    knob.Size = UDim2.new(0, 12, 0, 16)
+    knob.AnchorPoint = Vector2.new(0.5, 0.5)
+    knob.Position = UDim2.new(relDefault, 0, 0.5, 0)
+    knob.BackgroundColor3 = Color3.new(1, 1, 1)
+    knob.BorderSizePixel = 0
+    knob.Parent = bar
+    Instance.new("UICorner", knob).CornerRadius = UDim.new(0, 2)
+
+    local dragging = false
+    local function update(input)
+        local rel = math.clamp((input.Position.X - bar.AbsolutePosition.X) / bar.AbsoluteSize.X, 0, 1)
+        fill.Size = UDim2.new(rel, 0, 1, 0)
+        knob.Position = UDim2.new(rel, 0, 0.5, 0)
+        local val = min + rel * (max - min)
+        valLbl.Text = string.format("%.2f%s", val, suffix)
+        callback(val)
+    end
+    bar.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            dragging = true
+            update(input)
+        end
+    end)
+    UIS.InputChanged:Connect(function(input)
+        if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+            update(input)
+        end
+    end)
+    UIS.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            dragging = false
+        end
+    end)
+end
+
+-- ================== BUILD TABS ==================
+local combatPage, combatLayout = createTab("COMBAT", "⚔", 1)
+local visualPage, visualLayout = createTab("VISUAL", "◈", 2)
+local themePage, themeLayout = createTab("THEME", "◉", 3)
+
+-- COMBAT
+makeSection(combatPage, combatLayout, "Camlock")
+makeToggle(combatPage, "Camlock", false, function(on)
+    if on then startCamlock() else stopCamlock() end
+end)
+keybindBtn = makeButton(combatPage, "AIM KEY: " .. state.toggleKey.Name, function()
+    startKeybindCapture()
+end)
+makeSelector(combatPage, "AIM:", {"Head", "Torso", "Legs"}, {"HEAD", "BODY", "LEGS"},
+    function() return state.lockPart end,
+    function(v) state.lockPart = v end)
+makeSelector(combatPage, "PRIO:", {"Center", "Nearest", "LowHP"}, {"CENTER", "NEAR", "LOWHP"},
+    function() return state.priority end,
+    function(v) state.priority = v end)
+makeSlider(combatPage, "Smoothness", 0.05, 1.0, 0.35, function(v) state.smoothness = v end, "")
+makeSlider(combatPage, "FOV Radius", 80, 700, 350, function(v) state.fov = v end, "")
+
+makeSection(combatPage, combatLayout, "Auto Shoot")
+makeToggle(combatPage, "Auto Shoot", false, function(on) state.autoShoot = on end)
+makeToggle(combatPage, "Move Mouse Center", true, function(on) state.moveMouseToCenter = on end)
+makeToggle(combatPage, "Ignore Team", true, function(on) state.ignoreTeam = on end)
+makeSlider(combatPage, "Shoot Delay", 0.01, 0.3, 0.05, function(v) state.shootDelay = v end, "s")
+
+makeSection(combatPage, combatLayout, "Prediction")
+makeToggle(combatPage, "Prediction", false, function(on) state.predictionEnabled = on end)
+makeSlider(combatPage, "Predict Time", 0.05, 0.5, 0.15, function(v) state.predictionAmount = v end, "s")
+
+-- VISUAL
+makeSection(visualPage, visualLayout, "ESP")
+makeToggle(visualPage, "ESP Names", false, function(on) state.espEnabled = on end)
+
+makeSection(visualPage, visualLayout, "Overlay")
+makeToggle(visualPage, "Target Line", true, function(on) state.targetLineEnabled = on end)
+
+makeSection(visualPage, visualLayout, "Performance")
+makeToggle(visualPage, "FPS Boost", false, function(on)
+    if on then applyFpsBoost() else revertFpsBoost() end
+end)
+
+-- THEME
+makeSection(themePage, themeLayout, "Accent Color")
+local colorRow = Instance.new("Frame")
+colorRow.Size = UDim2.new(1, -4, 0, 42)
+colorRow.BackgroundColor3 = COL_PANEL
+colorRow.BorderSizePixel = 0
+colorRow.Parent = themePage
+local crs = Instance.new("UIStroke", colorRow)
+crs.Color = COL_BORDER
+crs.Thickness = 1
+
+local colorList = Instance.new("UIListLayout")
+colorList.FillDirection = Enum.FillDirection.Horizontal
+colorList.Padding = UDim.new(0, 6)
+colorList.VerticalAlignment = Enum.VerticalAlignment.Center
+colorList.HorizontalAlignment = Enum.HorizontalAlignment.Center
+colorList.SortOrder = Enum.SortOrder.LayoutOrder
+colorList.Parent = colorRow
+
+local colorPresets = {
+    Color3.fromRGB(0, 255, 200),
+    Color3.fromRGB(255, 80, 80),
+    Color3.fromRGB(80, 140, 255),
+    Color3.fromRGB(180, 80, 255),
+    Color3.fromRGB(255, 200, 50),
+    Color3.fromRGB(255, 130, 200),
+}
+for i, col in ipairs(colorPresets) do
+    local swatch = Instance.new("TextButton")
+    swatch.Size = UDim2.new(0, 34, 0, 28)
+    swatch.BackgroundColor3 = col
+    swatch.Text = ""
+    swatch.AutoButtonColor = false
+    swatch.LayoutOrder = i
+    swatch.Parent = colorRow
+    Instance.new("UICorner", swatch).CornerRadius = UDim.new(0, 2)
+    local ss = Instance.new("UIStroke", swatch)
+    ss.Color = Color3.new(1, 1, 1)
+    ss.Thickness = 1
+    swatch.MouseEnter:Connect(function()
+        TweenService:Create(ss, TweenInfo.new(0.15), {Thickness = 2}):Play()
+    end)
+    swatch.MouseLeave:Connect(function()
+        TweenService:Create(ss, TweenInfo.new(0.15), {Thickness = 1}):Play()
+    end)
+    swatch.MouseButton1Click:Connect(function()
+        state.accentColor = col
+        applyAccent()
+    end)
+end
+
+makeSection(themePage, themeLayout, "Actions")
+makeButton(themePage, "Reset Cam Offset", function() state.lockedOffset = nil end)
+
+for _, tb in ipairs(tabButtons) do
+    tb.btn.MouseButton1Click:Connect(function() switchTab(tb.name) end)
+end
+switchTab("COMBAT")
+
+-- STATUS BAR
+local statusBar = Instance.new("Frame")
+statusBar.Size = UDim2.new(1, -20, 0, 36)
+statusBar.Position = UDim2.new(0, 10, 1, -76)
+statusBar.BackgroundColor3 = Color3.fromRGB(4, 4, 6)
+statusBar.BorderSizePixel = 0
+statusBar.Parent = main
+local sbs = Instance.new("UIStroke", statusBar)
+sbs.Color = state.accentColor
+sbs.Thickness = 1
+regAccent(sbs, "Color")
+
+local statusDot = Instance.new("Frame")
+statusDot.Size = UDim2.new(0, 6, 0, 6)
+statusDot.Position = UDim2.new(0, 8, 0, 8)
+statusDot.BackgroundColor3 = state.accentColor
+statusDot.BorderSizePixel = 0
+statusDot.Parent = statusBar
+Instance.new("UICorner", statusDot).CornerRadius = UDim.new(1, 0)
+regAccent(statusDot, "BackgroundColor3")
+
+local statusL1 = Instance.new("TextLabel")
+statusL1.Size = UDim2.new(1, -24, 0, 14)
+statusL1.Position = UDim2.new(0, 20, 0, 4)
+statusL1.BackgroundTransparency = 1
+statusL1.Text = "STATE: IDLE"
+statusL1.TextColor3 = state.accentColor
+statusL1.Font = FONT_B
+statusL1.TextSize = 10
+statusL1.TextXAlignment = Enum.TextXAlignment.Left
+statusL1.Parent = statusBar
+regAccent(statusL1, "TextColor3")
+
+local statusL2 = Instance.new("TextLabel")
+statusL2.Size = UDim2.new(1, -24, 0, 12)
+statusL2.Position = UDim2.new(0, 20, 0, 19)
+statusL2.BackgroundTransparency = 1
+statusL2.Text = "TARGET: none"
+statusL2.TextColor3 = COL_TEXT_DIM
+statusL2.Font = FONT
+statusL2.TextSize = 10
+statusL2.TextXAlignment = Enum.TextXAlignment.Left
+statusL2.Parent = statusBar
+
+task.spawn(function()
+    while task.wait(0.15) do
+        local parts = {}
+        if state.camlockEnabled then table.insert(parts, "LOCK") end
+        if state.autoShoot and state.camlockEnabled then table.insert(parts, "AUTO") end
+        if state.predictionEnabled and state.camlockEnabled then table.insert(parts, "PRED") end
+        if state.espEnabled then table.insert(parts, "ESP") end
+        if state.fpsBoost then table.insert(parts, "FPS+") end
+        if #parts == 0 then table.insert(parts, "IDLE") end
+        statusL1.Text = "STATE: " .. table.concat(parts, " + ")
+        statusL1.TextColor3 = state.accentColor
+        statusL2.Text = "TARGET: " .. (state.target and state.target.Name or "none")
+    end
+end)
+
+task.spawn(function()
+    while statusDot.Parent do
+        TweenService:Create(statusDot, TweenInfo.new(0.6), {BackgroundTransparency = 0.7}):Play()
+        task.wait(0.6)
+        TweenService:Create(statusDot, TweenInfo.new(0.6), {BackgroundTransparency = 0}):Play()
+        task.wait(0.6)
+    end
+end)
+
+-- FOOTER
+local footer = Instance.new("Frame")
+footer.Size = UDim2.new(1, 0, 0, 32)
+footer.Position = UDim2.new(0, 0, 1, -32)
+footer.BackgroundColor3 = Color3.fromRGB(4, 4, 6)
+footer.BorderSizePixel = 0
+footer.Parent = main
+
+local footerLine = Instance.new("Frame")
+footerLine.Size = UDim2.new(1, 0, 0, 1)
+footerLine.Position = UDim2.new(0, 0, 0, 0)
+footerLine.BackgroundColor3 = state.accentColor
+footerLine.BorderSizePixel = 0
+footerLine.Parent = footer
+regAccent(footerLine, "BackgroundColor3")
+
+local footerText = Instance.new("TextLabel")
+footerText.Size = UDim2.new(1, -40, 1, 0)
+footerText.Position = UDim2.new(0, 20, 0, 0)
+footerText.BackgroundTransparency = 1
+footerText.Text = "discord.gg/vietliferp"
+footerText.TextColor3 = COL_TEXT_DIM
+footerText.Font = FONT_B
+footerText.TextSize = 11
+footerText.Parent = footer
+
+local footerDot = Instance.new("Frame")
+footerDot.Size = UDim2.new(0, 4, 0, 4)
+footerDot.Position = UDim2.new(0, 10, 0.5, -2)
+footerDot.BackgroundColor3 = state.accentColor
+footerDot.BorderSizePixel = 0
+footerDot.Parent = footer
+Instance.new("UICorner", footerDot).CornerRadius = UDim.new(1, 0)
+regAccent(footerDot, "BackgroundColor3")
+
+task.spawn(function()
+    while footer.Parent do
+        TweenService:Create(footerText, TweenInfo.new(0.7), {TextColor3 = state.accentColor}):Play()
+        task.wait(0.7)
+        TweenService:Create(footerText, TweenInfo.new(0.7), {TextColor3 = COL_TEXT_DIM}):Play()
+        task.wait(0.7)
+    end
+end)
+
+task.spawn(function()
+    while logoStroke.Parent do
+        TweenService:Create(logoStroke, TweenInfo.new(1.2), {Thickness = 2.5, Transparency = 0}):Play()
+        task.wait(1.2)
+        TweenService:Create(logoStroke, TweenInfo.new(1.2), {Thickness = 1.5, Transparency = 0.3}):Play()
+        task.wait(1.2)
+    end
+end)
+
+-- MIN / CLOSE
+local minimized = false
+minBtn.MouseButton1Click:Connect(function()
+    minimized = not minimized
+    local sz = minimized and UDim2.new(0, 340, 0, 48) or UDim2.new(0, 340, 0, 460)
+    TweenService:Create(main, TweenInfo.new(0.3, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {Size = sz}):Play()
+    tabBar.Visible = not minimized
+    tabContainer.Visible = not minimized
+    statusBar.Visible = not minimized
+    footer.Visible = not minimized
+end)
+
+closeBtn.MouseButton1Click:Connect(function()
+    stopCamlock()
+    if state.fpsBoost then revertFpsBoost() end
+    for _, d in pairs(espCache) do
+        if d.billboard then d.billboard:Destroy() end
+    end
+    espFolder:Destroy()
+    markerGui:Destroy()
+    gui:Destroy()
+    overlayGui:Destroy()
+end)
+
+-- LOOPS
+local function isMouseOverGUI()
+    local m = UIS:GetMouseLocation()
+    local p = main.AbsolutePosition
+    local s = main.AbsoluteSize
+    return m.X >= p.X and m.X <= p.X + s.X and m.Y >= p.Y and m.Y <= p.Y + s.Y
+end
+
+task.spawn(function()
+    while task.wait(state.shootDelay) do
+        if state.camlockEnabled and state.autoShoot and state.target and not isMouseOverGUI() then
+            local t = state.target
+            if t.Character then
+                local hum = t.Character:FindFirstChildOfClass("Humanoid")
+                if hum and hum.Health > 0 then doClick() end
+            end
+        end
+    end
+end)
+
+task.spawn(function()
+    while task.wait(0.25) do
+        if state.camlockEnabled then
+            local t = state.target
+            local need = false
+            if not t or not t.Parent or not t.Character then
+                need = true
+            else
+                local hum = t.Character:FindFirstChildOfClass("Humanoid")
+                if not hum or hum.Health <= 0 then need = true end
+            end
+            if need then state.target = getFrontPlayer() end
+        end
+    end
+end)
+
+-- KEYBIND
+local lastKeyState = false
+RunService.RenderStepped:Connect(function()
+    if state.waitingForKey then return end
+    local kd = UIS:IsKeyDown(state.toggleKey)
+    if kd and not lastKeyState then toggleCamlock() end
+    lastKeyState = kd
+end)
+
+UIS.InputBegan:Connect(function(input, gpe)
+    if gpe then return end
+    if state.waitingForKey then
+        if input.UserInputType == Enum.UserInputType.Keyboard then
+            state.toggleKey = input.KeyCode
+            stopKeybindCapture()
+            log("Aim key changed to:", input.KeyCode.Name)
+        elseif input.UserInputType == Enum.UserInputType.MouseButton1 then
+            stopKeybindCapture()
+        end
+    end
+end)
+
+updateKeybindDisplay()
+log("Loaded v21 - Sleek Tech GUI")
